@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html>
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="utf-8">
+  
+  <title>SpringCloud教程(Finchley版本)-07：网关（Zuul） | Hexo</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  
+    <meta name="keywords" content="IT云清的博客">
+  
+  <meta name="description" content="在微服务架构中，后端服务往往不会直接开放给调用端，而是通过一个网关根据请求的url，路由到相应的服务。当添加网关后，在第三方调用端和服务提供方之间就创建了一面墙，这面墙直接与调用方通信进行权限控制，后将请求均衡分发给后台服务端。在Spring Cloud体系中， Spring Cloud Zuul就起到了网关的作用，它可以提供动态路由，监控，弹性，安全等的边缘服务。本文示例一下zuul的简单使用，">
+<meta name="keywords" content="SpringCloud,Zuul">
+<meta property="og:type" content="article">
+<meta property="og:title" content="SpringCloud教程(Finchley版本)-07：网关（Zuul）">
+<meta property="og:url" content="https://java4all.cn/2018/01/07/SpringCloud教程(Finchley版本)-07：网关（Zuul）/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="在微服务架构中，后端服务往往不会直接开放给调用端，而是通过一个网关根据请求的url，路由到相应的服务。当添加网关后，在第三方调用端和服务提供方之间就创建了一面墙，这面墙直接与调用方通信进行权限控制，后将请求均衡分发给后台服务端。在Spring Cloud体系中， Spring Cloud Zuul就起到了网关的作用，它可以提供动态路由，监控，弹性，安全等的边缘服务。本文示例一下zuul的简单使用，">
+<meta property="og:locale" content="en">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/2018121510584132.png">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/20181215105854297.png">
+<meta property="og:updated_time" content="2020-01-14T11:35:04.273Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="SpringCloud教程(Finchley版本)-07：网关（Zuul）">
+<meta name="twitter:description" content="在微服务架构中，后端服务往往不会直接开放给调用端，而是通过一个网关根据请求的url，路由到相应的服务。当添加网关后，在第三方调用端和服务提供方之间就创建了一面墙，这面墙直接与调用方通信进行权限控制，后将请求均衡分发给后台服务端。在Spring Cloud体系中， Spring Cloud Zuul就起到了网关的作用，它可以提供动态路由，监控，弹性，安全等的边缘服务。本文示例一下zuul的简单使用，">
+<meta name="twitter:image" content="https://img-blog.csdnimg.cn/2018121510584132.png">
+  
+  
+    <link rel="icon" href="/my.icon">
+  
+  <link href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+  <link rel="stylesheet" href="/css/style.css">
+  <script src="/js/pace.min.js"></script>
+  
+
+  
+  
+
+</head>
+</html>
+<body>
+  <div id="container">
+      <header id="header">
+    <div id="banner"></div>
+    <div id="header-outer">
+        <div id="header-menu" class="header-menu-pos animated">
+            <div class="header-menu-container">
+                <a href="/" class="left">
+                    <span class="site-title">IT云清</span>
+                </a>
+                <nav id="header-menu-nav" class="right">
+                    
+                    <a  href="/">
+                        <i class="fa fa-home"></i>
+                        <span>Home</span>
+                    </a>
+                    
+                    <a  href="/archives">
+                        <i class="fa fa-archive"></i>
+                        <span>Archives</span>
+                    </a>
+                    
+                    <a  href="/about">
+                        <i class="fa fa-user"></i>
+                        <span>About</span>
+                    </a>
+                    
+                </nav>
+                <a class="mobile-header-menu-button">
+                    <i class="fa fa-bars"></i>
+                </a>
+            </div>
+        </div>
+        <div id="header-row">
+            <div id="logo">
+                <a href="/">
+                    <img src="/images/logo3.jpg" alt="logo">
+                </a>
+            </div>
+            <div class="header-info">
+                <div id="header-title">
+                    
+                    <h2>
+                        IT云清
+                    </h2>
+                    
+                </div>
+                <div id="header-description">
+                    
+                    <h3>
+                        专注于JAVA
+                    </h3>
+                    
+                </div>
+            </div>
+            <nav class="header-nav">
+                <div class="social">
+                    
+                        <a title="IT云清" target="_blank" href="//java4all.cn">
+                            <i class="fa fa-home fa-2x"></i></a>
+                    
+                        <a title="Github" target="_blank" href="//github.com/lightClouds917">
+                            <i class="fa fa-github fa-2x"></i></a>
+                    
+                        <a title="CSDN" target="_blank" href="//it4all.blog.csdn.net">
+                            <i class="fa fa-twitter fa-2x"></i></a>
+                    
+                        <a title="w1186355422"  ">
+                            <i class="fa fa-weixin fa-2x"></i></a>
+                    
+                </div>
+            </nav>
+        </div>
+    </div>
+</header>
+      <div class="outer">
+        <section id="main" class="body-wrap"><article id="post-SpringCloud教程(Finchley版本)-07：网关（Zuul）" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 class="post-title" itemprop="name">
+      SpringCloud教程(Finchley版本)-07：网关（Zuul）
+    </h1>
+    <div class="post-title-bar">
+      <ul>
+          
+              <li>
+                  <i class="fa fa-book"></i>
+                  
+                      <a href="/categories/SpringCloud/">SpringCloud</a>
+                  
+              </li>
+          
+        <li>
+          <i class="fa fa-calendar"></i>  2018-01-07
+        </li>
+        <li>
+          <i class="fa fa-eye"></i>
+          <span id="busuanzi_value_page_pv"></span>
+        </li>
+      </ul>
+    </div>
+  
+
+          
+      </header>
+    
+    <div class="article-entry post-content" itemprop="articleBody">
+      
+            
+            <p>在微服务架构中，后端服务往往不会直接开放给调用端，而是通过一个网关根据请求的url，路由到相应的服务。当添加网关后，在第三方调用端和服务提供方之间就创建了一面墙，这面墙直接与调用方通信进行权限控制，后将请求均衡分发给后台服务端。在Spring Cloud体系中， Spring Cloud Zuul就起到了网关的作用，它可以提供动态路由，监控，弹性，安全等的边缘服务。本文示例一下zuul的简单使用，主要分为以下几个步骤：</p>
+<ul>
+<li>1.创建项目</li>
+<li>2.引入依赖</li>
+<li>3.修改配置文件</li>
+<li>4.添加启动注解</li>
+<li>5.自定义Filter</li>
+<li>6.启动项目，测试 </li>
+</ul>
+<h3 id="1-创建项目"><a href="#1-创建项目" class="headerlink" title="1.创建项目"></a>1.创建项目</h3><p>新建一个Springboot项目zuul_server1。</p>
+<h3 id="2-引入依赖"><a href="#2-引入依赖" class="headerlink" title="2.引入依赖"></a>2.引入依赖</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">&lt;!--eureka client--&gt;</span><br><span class="line">&lt;dependency&gt;</span><br><span class="line">	&lt;groupId&gt;org.springframework.cloud&lt;/groupId&gt;</span><br><span class="line">	&lt;artifactId&gt;spring-cloud-starter-netflix-eureka-client&lt;/artifactId&gt;</span><br><span class="line">&lt;/dependency&gt;</span><br><span class="line"></span><br><span class="line">&lt;!--zuul--&gt;</span><br><span class="line">&lt;dependency&gt;</span><br><span class="line">	&lt;groupId&gt;org.springframework.cloud&lt;/groupId&gt;</span><br><span class="line">	&lt;artifactId&gt;spring-cloud-starter-netflix-zuul&lt;/artifactId&gt;</span><br><span class="line">&lt;/dependency&gt;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">&lt;dependencyManagement&gt;</span><br><span class="line">	&lt;dependencies&gt;</span><br><span class="line">		&lt;dependency&gt;</span><br><span class="line">			&lt;groupId&gt;org.springframework.cloud&lt;/groupId&gt;</span><br><span class="line">			&lt;artifactId&gt;spring-cloud-dependencies&lt;/artifactId&gt;</span><br><span class="line">			&lt;version&gt;$&#123;spring-cloud.version&#125;&lt;/version&gt;</span><br><span class="line">			&lt;type&gt;pom&lt;/type&gt;</span><br><span class="line">			&lt;scope&gt;import&lt;/scope&gt;</span><br><span class="line">		&lt;/dependency&gt;</span><br><span class="line">	&lt;/dependencies&gt;</span><br><span class="line">&lt;/dependencyManagement&gt;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&lt;spring-cloud.version&gt;Finchley.SR2&lt;/spring-cloud.version&gt;</span><br></pre></td></tr></table></figure>
+
+<h3 id="3-修改配置文件"><a href="#3-修改配置文件" class="headerlink" title="3.修改配置文件"></a>3.修改配置文件</h3><p>zuul需要注册到eureka上，然后我们配置路由，配置指定类型的请求路由到指定的服务上：当请求path是以/api-a/开头的，就转发到feign-server1服务上，当请求path是以/api-b/开头的，就转发到service-ribbon服务上，如果有其他路由，在routes下继续添加即可：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">server:</span><br><span class="line">  port: 8018</span><br><span class="line"></span><br><span class="line">spring:</span><br><span class="line">  application:</span><br><span class="line">    name: zuul-server</span><br><span class="line"></span><br><span class="line">eureka:</span><br><span class="line">  client:</span><br><span class="line">    service-url:</span><br><span class="line">      default: http://localhost:8761/eureka</span><br><span class="line"></span><br><span class="line">zuul:</span><br><span class="line">  routes:</span><br><span class="line">    apia:</span><br><span class="line">      path: /api-a/**</span><br><span class="line">      serviceId: feign-server1</span><br><span class="line">    apib:</span><br><span class="line">      path: /api-b/**</span><br><span class="line">      serviceId: service-ribbon</span><br></pre></td></tr></table></figure>
+
+<h3 id="4-添加启动注解"><a href="#4-添加启动注解" class="headerlink" title="4.添加启动注解"></a>4.添加启动注解</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">//开启zuul的功能</span><br><span class="line">@EnableZuulProxy</span><br><span class="line">@EnableEurekaClient</span><br><span class="line">@EnableDiscoveryClient</span><br><span class="line">@SpringBootApplication</span><br><span class="line">public class ZuulServer1Application &#123;</span><br><span class="line"></span><br><span class="line">	public static void main(String[] args) &#123;</span><br><span class="line">		SpringApplication.run(ZuulServer1Application.class, args);</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="5-自定义Filter"><a href="#5-自定义Filter" class="headerlink" title="5.自定义Filter"></a>5.自定义Filter</h3><p>zuul提供的功能，不仅仅是路由，我们还可以把所有的请求，在网关这一层，做个安全的校验，过滤，或者，也可以做一些其的处理。这里做个简单的token是否为空的校验，我们需要用到Filter.</p>
+<p>Filter是Zuul的核心，用来实现对外服务的控制。Filter的生命周期有4个，分别是“PRE”、“ROUTING”、“POST”、“ERROR”,Zuul大部分功能都是通过过滤器来实现的，这些过滤器类型对应于请求的典型生命周期。</p>
+<ul>
+<li>PRE： 这种过滤器在请求被路由之前调用。我们可利用这种过滤器实现身份验证、在集群中选择请求的微服务、记录调试信息等。</li>
+<li>ROUTING：这种过滤器将请求路由到微服务。这种过滤器用于构建发送给微服务的请求，并使用Apache HttpClient或Netfilx Ribbon请求微服务。</li>
+<li>POST：这种过滤器在路由到微服务以后执行。这种过滤器可用来为响应添加标准的HTTP Header、收集统计信息和指标、将响应从微服务发送给客户端等。</li>
+<li>ERROR：在其他阶段发生错误时执行该过滤器。 除了默认的过滤器类型，Zuul还允许我们创建自定义的过滤器类型。例如，我们可以定制一种STATIC类型的过滤器，直接在Zuul中生成响应，而不将请求转发到后端的微服务。</li>
+</ul>
+<p>此部分更具体的内容，可以参考：<a href="http://www.ityouknow.com/springcloud/2018/01/20/spring-cloud-zuul.html" target="_blank" rel="noopener">click here</a> </p>
+<p>我们来自定义一个Filter，用来校验token是否为空，自定义Filter，需要继承ZuulFilter，并实现其中的一些方法。我们在run中，多请求做个校验，当token为空时，就直接返回，不再向后端服务转发。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br></pre></td><td class="code"><pre><span class="line">@Component</span><br><span class="line">public class RequestFilter extends ZuulFilter&#123;</span><br><span class="line"></span><br><span class="line">  private static Logger logger = LoggerFactory.getLogger(RequestFilter.class);</span><br><span class="line"></span><br><span class="line">  /**</span><br><span class="line">   * pre 路由之前</span><br><span class="line">   * routing 路由之时</span><br><span class="line">   * post 路由之后</span><br><span class="line">   * error 发送错误调用</span><br><span class="line">   * @return</span><br><span class="line">   */</span><br><span class="line">  @Override</span><br><span class="line">  public String filterType() &#123;</span><br><span class="line">    return &quot;pre&quot;;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  /**过滤的顺序，数字越小越先执行*/</span><br><span class="line">  @Override</span><br><span class="line">  public int filterOrder() &#123;</span><br><span class="line">    return 0;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  /**这里可以写逻辑判断，是否要过滤，true表示过滤，false表示不过滤*/</span><br><span class="line">  @Override</span><br><span class="line">  public boolean shouldFilter() &#123;</span><br><span class="line">    return true;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  /**filter需要执行的具体操作*/</span><br><span class="line">  @Override</span><br><span class="line">  public Object run() throws ZuulException &#123;</span><br><span class="line">    RequestContext currentContext = RequestContext.getCurrentContext();</span><br><span class="line">    HttpServletRequest request = currentContext.getRequest();</span><br><span class="line">    String token = request.getParameter(&quot;token&quot;);</span><br><span class="line">    if(StringUtils.isEmpty(token))&#123;</span><br><span class="line">      logger.warn(&quot;=======&gt;token is empty&quot;);</span><br><span class="line">      currentContext.setSendZuulResponse(false);//不对其进行路由</span><br><span class="line">      currentContext.setResponseStatusCode(401);</span><br><span class="line">      try &#123;</span><br><span class="line">        currentContext.getResponse().getWriter().write(&quot;token is empty&quot;);</span><br><span class="line">      &#125;catch (Exception ex)&#123;</span><br><span class="line">        ex.printStackTrace();</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;else &#123;</span><br><span class="line">      currentContext.setSendZuulResponse(true);//进行路由</span><br><span class="line">      currentContext.setResponseStatusCode(200);</span><br><span class="line">    &#125;</span><br><span class="line">    return null;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="6-启动项目，测试"><a href="#6-启动项目，测试" class="headerlink" title="6.启动项目，测试"></a>6.启动项目，测试</h3><p>我们需要启动前几篇文章创建的几个服务，然后启动本文的服务。然后先访问:<a href="http://localhost:8018/api-a/getCompany?id=234" target="_blank" rel="noopener">http://localhost:8018/api-a/getCompany?id=234</a>, 这个请求中没有带token参数的，查看结果：<br><img src="https://img-blog.csdnimg.cn/2018121510584132.png" alt="在这里插入图片描述"></p>
+<p>会发现，这个请求，并没有到后台服务，直接在网关这里就被拦截返回了。我们再请求一下：<a href="http://localhost:8018/api-b/getCompany?id=234&amp;token=qweqew，" target="_blank" rel="noopener">http://localhost:8018/api-b/getCompany?id=234&amp;token=qweqew，</a> 查看结果：<br><img src="https://img-blog.csdnimg.cn/20181215105854297.png" alt="在这里插入图片描述"><br>由于带的有token，请求顺利的到了后台，请求到了指定服务。</p>
+<p>完整源码参考：<a href="https://github.com/myJava4all/springcloudfinchley" target="_blank" rel="noopener">https://github.com/myJava4all/springcloudfinchley</a></p>
+
+            <div class="post-copyright">
+    <div class="content">
+        <p>最后更新： 2020年01月14日 19:35</p>
+        <p>原始链接： <a class="post-url" href="/2018/01/07/SpringCloud教程(Finchley版本)-07：网关（Zuul）/" title="SpringCloud教程(Finchley版本)-07：网关（Zuul）">https://java4all.cn/2018/01/07/SpringCloud教程(Finchley版本)-07：网关（Zuul）/</a></p>
+        <footer>
+            <a href="https://java4all.cn">
+                <img src="/images/logo3.jpg" alt="IT云清">
+                IT云清
+            </a>
+        </footer>
+    </div>
+</div>
+
+      
+        
+            
+
+        
+    </div>
+    <footer class="article-footer">
+        
+        
+<div class="post-share">
+    <a href="javascript:;" id="share-sub" class="post-share-fab">
+        <i class="fa fa-share-alt"></i>
+    </a>
+    <div class="post-share-list" id="share-list">
+        <ul class="share-icons">
+          <li>
+            <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=https://java4all.cn/2018/01/07/SpringCloud教程(Finchley版本)-07：网关（Zuul）/&title=《SpringCloud教程(Finchley版本)-07：网关（Zuul）》 — Hexo&pic=https://java4all.cn/images/电脑10.jpg" data-title="微博">
+              <i class="fa fa-weibo"></i>
+            </a>
+          </li>
+          <li>
+            <a class="weixin share-sns" id="wxFab" href="javascript:;" data-title="微信">
+              <i class="fa fa-weixin"></i>
+            </a>
+          </li>
+          <li>
+            <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=https://java4all.cn/2018/01/07/SpringCloud教程(Finchley版本)-07：网关（Zuul）/&title=《SpringCloud教程(Finchley版本)-07：网关（Zuul）》 — Hexo&source=" data-title="QQ">
+              <i class="fa fa-qq"></i>
+            </a>
+          </li>
+          <li>
+            <a class="facebook share-sns" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=https://java4all.cn/2018/01/07/SpringCloud教程(Finchley版本)-07：网关（Zuul）/" data-title="Facebook">
+              <i class="fa fa-facebook"></i>
+            </a>
+          </li>
+          <li>
+            <a class="twitter share-sns" target="_blank" href="https://twitter.com/intent/tweet?text=《SpringCloud教程(Finchley版本)-07：网关（Zuul）》 — Hexo&url=https://java4all.cn/2018/01/07/SpringCloud教程(Finchley版本)-07：网关（Zuul）/&via=https://java4all.cn" data-title="Twitter">
+              <i class="fa fa-twitter"></i>
+            </a>
+          </li>
+          <li>
+            <a class="google share-sns" target="_blank" href="https://plus.google.com/share?url=https://java4all.cn/2018/01/07/SpringCloud教程(Finchley版本)-07：网关（Zuul）/" data-title="Google+">
+              <i class="fa fa-google-plus"></i>
+            </a>
+          </li>
+        </ul>
+     </div>
+</div>
+<div class="post-modal wx-share" id="wxShare">
+    <a class="close" href="javascript:;" id="wxShare-close">×</a>
+    <p>扫一扫，分享到微信</p>
+    <img src="//api.qrserver.com/v1/create-qr-code/?data=https://java4all.cn/2018/01/07/SpringCloud教程(Finchley版本)-07：网关（Zuul）/" alt="微信分享二维码">
+</div>
+
+<div class="mask"></div>
+
+        
+        <ul class="article-footer-menu">
+            
+            
+  <li class="article-footer-tags">
+    <i class="fa fa-tags"></i>
+      
+    <a href="/tags/SpringCloud/" class="color2">SpringCloud</a>
+      
+    <a href="/tags/Zuul/" class="color5">Zuul</a>
+      
+  </li>
+
+        </ul>
+        
+    </footer>
+  </div>
+</article>
+
+
+    <aside class="post-toc-pos post-toc-top" id="post-toc">
+        <nav class="post-toc-wrap">
+            <ol class="post-toc"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#1-创建项目"><span class="post-toc-text">1.创建项目</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#2-引入依赖"><span class="post-toc-text">2.引入依赖</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#3-修改配置文件"><span class="post-toc-text">3.修改配置文件</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#4-添加启动注解"><span class="post-toc-text">4.添加启动注解</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#5-自定义Filter"><span class="post-toc-text">5.自定义Filter</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#6-启动项目，测试"><span class="post-toc-text">6.启动项目，测试</span></a></li></ol>
+        </nav>
+    </aside>
+    
+
+<nav id="article-nav">
+  
+    <a href="/2020/01/05/Seata1.0版本整合教程/" id="article-nav-newer" class="article-nav-link-wrap">
+
+      <span class="article-nav-title">
+        <i class="fa fa-hand-o-left" aria-hidden="true"></i>
+        
+          Seata 1.0版本整合SpringCloud教程
+        
+      </span>
+    </a>
+  
+  
+    <a href="/2018/01/06/SpringCloud教程(Finchley版本)-06：断路器（Hystrix-Feign）/" id="article-nav-older" class="article-nav-link-wrap">
+      <span class="article-nav-title">SpringCloud教程(Finchley版本)-06：断路器（Hystrix-Feign）</span>
+      <i class="fa fa-hand-o-right" aria-hidden="true"></i>
+    </a>
+  
+</nav>
+
+
+
+    
+</section>
+        
+      </div>
+      <footer id="footer">
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      
+<p>
+    <span id="busuanzi_container_site_uv" style='display:none'>
+        今日访客数：<span id="busuanzi_value_site_uv"></span>
+    </span>
+    <span id="busuanzi_container_site_pv" style='display:none'>
+        今日访问量：<span id="busuanzi_value_site_pv"></span>
+    </span>
+</p>
+
+
+      <p>
+        Powered by  <a href="http://hexo.io/" target="_blank">Hexo</a>
+        Theme <a href="//github.com/wongminho/hexo-theme-miho" target="_blank">MiHo</a>
+      &copy; 2020 IT云清<br>
+      </p>
+    </div>
+  </div>
+</footer>
+    <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+<script src="//cdn.bootcss.com/jquery/3.2.1/jquery.min.js"></script>
+<script>
+  var mihoConfig = {
+      root: "https://java4all.cn",
+      animate: true,
+      isHome: false,
+      share: true,
+      reward: 0
+  }
+</script>
+<div class="sidebar">
+    <div id="sidebar-search" title="Search">
+        <i class="fa fa-search"></i>
+    </div>
+    <div id="sidebar-category" title="Categories">
+        <i class="fa fa-book"></i>
+    </div>
+    <div id="sidebar-tag" title="Tags">
+        <i class="fa fa-tags"></i>
+    </div>
+    <div id="sidebar-top">
+        <span class="sidebar-top-icon"><i class="fa fa-angle-up"></i></span>
+    </div>
+</div>
+<div class="sidebar-menu-box" id="sidebar-menu-box">
+    <div class="sidebar-menu-box-container">
+        <div id="sidebar-menu-box-categories">
+            <a class="category-link" href="/categories/Seata/">Seata</a><a class="category-link" href="/categories/SpringCloud/">SpringCloud</a><a class="category-link" href="/categories/管理/">管理</a>
+        </div>
+        <div id="sidebar-menu-box-tags">
+            <a href="/tags/Eureka/" style="font-size: 10px;">Eureka</a> <a href="/tags/Feign/" style="font-size: 15px;">Feign</a> <a href="/tags/Hystrix/" style="font-size: 15px;">Hystrix</a> <a href="/tags/Java/" style="font-size: 15px;">Java</a> <a href="/tags/Ribbon/" style="font-size: 15px;">Ribbon</a> <a href="/tags/Seata/" style="font-size: 10px;">Seata</a> <a href="/tags/SpringCloud/" style="font-size: 20px;">SpringCloud</a> <a href="/tags/Zuul/" style="font-size: 10px;">Zuul</a> <a href="/tags/code-review/" style="font-size: 10px;">code review</a> <a href="/tags/管理/" style="font-size: 10px;">管理</a>
+        </div>
+    </div>
+    <a href="javascript:;" class="sidebar-menu-box-close">&times;</a>
+</div>
+<div class="mobile-header-menu-nav" id="mobile-header-menu-nav">
+    <div class="mobile-header-menu-container">
+        <span class="title">Menus</span>
+        <ul class="mobile-header-menu-navbar">
+            
+            <li>
+                <a  href="/">
+                    <i class="fa fa-home"></i><span>Home</span>
+                </a>
+            </li>
+            
+            <li>
+                <a  href="/archives">
+                    <i class="fa fa-archive"></i><span>Archives</span>
+                </a>
+            </li>
+            
+            <li>
+                <a  href="/about">
+                    <i class="fa fa-user"></i><span>About</span>
+                </a>
+            </li>
+            
+        </ul>
+    </div>
+    <div class="mobile-header-tag-container">
+        <span class="title">Tags</span>
+        <div id="mobile-header-container-tags">
+            <a href="/tags/Eureka/" style="font-size: 10px;">Eureka</a> <a href="/tags/Feign/" style="font-size: 15px;">Feign</a> <a href="/tags/Hystrix/" style="font-size: 15px;">Hystrix</a> <a href="/tags/Java/" style="font-size: 15px;">Java</a> <a href="/tags/Ribbon/" style="font-size: 15px;">Ribbon</a> <a href="/tags/Seata/" style="font-size: 10px;">Seata</a> <a href="/tags/SpringCloud/" style="font-size: 20px;">SpringCloud</a> <a href="/tags/Zuul/" style="font-size: 10px;">Zuul</a> <a href="/tags/code-review/" style="font-size: 10px;">code review</a> <a href="/tags/管理/" style="font-size: 10px;">管理</a>
+        </div>
+    </div>
+</div>
+<div class="search-wrap">
+    <span class="search-close">&times;</span>
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="back">
+            <i class="icon icon-lg icon-chevron-left"></i>
+        </a>
+        <input class="search-field" placeholder="Search..." id="keywords">
+        <a id="search-submit" href="javascript:;">
+            <i class="fa fa-search"></i>
+        </a>
+    <div class="search-container" id="search-container">
+        <ul class="search-result" id="search-result">
+        </ul>
+    </div>
+</div>
+
+<div id="search-tpl">
+    <li class="search-result-item">
+        <a href="{url}" class="search-item-li">
+            <span class="search-item-li-title" title="{title}">{title}</span>
+        </a>
+    </li>
+</div>
+<script src="/js/search.js"></script>
+<script src="/js/main.js"></script>
+
+
+  <script src="//cdn.bootcss.com/particles.js/2.0.0/particles.min.js"></script>
+  <div id="particles"></div>
+  <script src="/js/particles.js"></script>
+
+
+
+
+
+
+
+  <link rel="stylesheet" href="//cdn.bootcss.com/animate.css/3.5.0/animate.min.css">
+  <script src="//cdn.bootcss.com/scrollReveal.js/3.0.5/scrollreveal.js"></script>
+  <script src="/js/animate.js"></script>
+
+
+  <script src="/js/pop-img.js"></script>
+  <script>
+     $(".article-entry p img").popImg();
+  </script>
+
+  </div>
+</body>
+</html>
