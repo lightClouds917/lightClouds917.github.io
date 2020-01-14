@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html>
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="utf-8">
+  
+  <title>SpringCloud教程(Finchley版本)-02：服务消费者 | Hexo</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  
+    <meta name="keywords" content="IT云清的博客">
+  
+  <meta name="description" content="本文，讲述如何将一个服务注册到eureka注册中心，主要分为以下几个步骤： 1.新建项目 2.引入eureka依赖 3.添加注解 4.修改配置文件 5.新建一个controller，提供一个服务接口 6.启动项目  由于后续需要演示负载均衡，这里会创建两个项目company_server1，company_server2，这两个项目提供完全相同的服务，注册到注册中心时，使用相同的服务名称compa">
+<meta name="keywords" content="SpringCloud">
+<meta property="og:type" content="article">
+<meta property="og:title" content="SpringCloud教程(Finchley版本)-02：服务消费者">
+<meta property="og:url" content="https://java4all.cn/2018/01/02/SpringCloud教程(Finchley版本)-02：服务消费者/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="本文，讲述如何将一个服务注册到eureka注册中心，主要分为以下几个步骤： 1.新建项目 2.引入eureka依赖 3.添加注解 4.修改配置文件 5.新建一个controller，提供一个服务接口 6.启动项目  由于后续需要演示负载均衡，这里会创建两个项目company_server1，company_server2，这两个项目提供完全相同的服务，注册到注册中心时，使用相同的服务名称compa">
+<meta property="og:locale" content="en">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/20181124100403157.png">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/20181124100434772.png">
+<meta property="og:updated_time" content="2020-01-14T11:02:54.926Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="SpringCloud教程(Finchley版本)-02：服务消费者">
+<meta name="twitter:description" content="本文，讲述如何将一个服务注册到eureka注册中心，主要分为以下几个步骤： 1.新建项目 2.引入eureka依赖 3.添加注解 4.修改配置文件 5.新建一个controller，提供一个服务接口 6.启动项目  由于后续需要演示负载均衡，这里会创建两个项目company_server1，company_server2，这两个项目提供完全相同的服务，注册到注册中心时，使用相同的服务名称compa">
+<meta name="twitter:image" content="https://img-blog.csdnimg.cn/20181124100403157.png">
+  
+  
+    <link rel="icon" href="/my.icon">
+  
+  <link href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+  <link rel="stylesheet" href="/css/style.css">
+  <script src="/js/pace.min.js"></script>
+  
+
+  
+  
+
+</head>
+</html>
+<body>
+  <div id="container">
+      <header id="header">
+    <div id="banner"></div>
+    <div id="header-outer">
+        <div id="header-menu" class="header-menu-pos animated">
+            <div class="header-menu-container">
+                <a href="/" class="left">
+                    <span class="site-title">IT云清</span>
+                </a>
+                <nav id="header-menu-nav" class="right">
+                    
+                    <a  href="/">
+                        <i class="fa fa-home"></i>
+                        <span>Home</span>
+                    </a>
+                    
+                    <a  href="/archives">
+                        <i class="fa fa-archive"></i>
+                        <span>Archives</span>
+                    </a>
+                    
+                    <a  href="/about">
+                        <i class="fa fa-user"></i>
+                        <span>About</span>
+                    </a>
+                    
+                </nav>
+                <a class="mobile-header-menu-button">
+                    <i class="fa fa-bars"></i>
+                </a>
+            </div>
+        </div>
+        <div id="header-row">
+            <div id="logo">
+                <a href="/">
+                    <img src="/images/logo3.jpg" alt="logo">
+                </a>
+            </div>
+            <div class="header-info">
+                <div id="header-title">
+                    
+                    <h2>
+                        IT云清
+                    </h2>
+                    
+                </div>
+                <div id="header-description">
+                    
+                    <h3>
+                        专注于JAVA
+                    </h3>
+                    
+                </div>
+            </div>
+            <nav class="header-nav">
+                <div class="social">
+                    
+                        <a title="IT云清" target="_blank" href="//java4all.cn">
+                            <i class="fa fa-home fa-2x"></i></a>
+                    
+                        <a title="Github" target="_blank" href="//github.com/lightClouds917">
+                            <i class="fa fa-github fa-2x"></i></a>
+                    
+                        <a title="CSDN" target="_blank" href="//it4all.blog.csdn.net">
+                            <i class="fa fa-twitter fa-2x"></i></a>
+                    
+                        <a title="w1186355422"  ">
+                            <i class="fa fa-weixin fa-2x"></i></a>
+                    
+                </div>
+            </nav>
+        </div>
+    </div>
+</header>
+      <div class="outer">
+        <section id="main" class="body-wrap"><article id="post-SpringCloud教程(Finchley版本)-02：服务消费者" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 class="post-title" itemprop="name">
+      SpringCloud教程(Finchley版本)-02：服务消费者
+    </h1>
+    <div class="post-title-bar">
+      <ul>
+          
+              <li>
+                  <i class="fa fa-book"></i>
+                  
+                      <a href="/categories/SpringCloud/">SpringCloud</a>
+                  
+              </li>
+          
+        <li>
+          <i class="fa fa-calendar"></i>  2018-01-02
+        </li>
+        <li>
+          <i class="fa fa-eye"></i>
+          <span id="busuanzi_value_page_pv"></span>
+        </li>
+      </ul>
+    </div>
+  
+
+          
+      </header>
+    
+    <div class="article-entry post-content" itemprop="articleBody">
+      
+            
+            <h5 id="本文，讲述如何将一个服务注册到eureka注册中心，主要分为以下几个步骤："><a href="#本文，讲述如何将一个服务注册到eureka注册中心，主要分为以下几个步骤：" class="headerlink" title="本文，讲述如何将一个服务注册到eureka注册中心，主要分为以下几个步骤："></a>本文，讲述如何将一个服务注册到eureka注册中心，主要分为以下几个步骤：</h5><ul>
+<li>1.新建项目</li>
+<li>2.引入eureka依赖</li>
+<li>3.添加注解</li>
+<li>4.修改配置文件</li>
+<li>5.新建一个controller，提供一个服务接口</li>
+<li>6.启动项目</li>
+</ul>
+<h5 id="由于后续需要演示负载均衡，这里会创建两个项目company-server1，company-server2，这两个项目提供完全相同的服务，注册到注册中心时，使用相同的服务名称company-server，由于是两个服务，所以项目的端口是不同的，其他相同。具体步骤如下："><a href="#由于后续需要演示负载均衡，这里会创建两个项目company-server1，company-server2，这两个项目提供完全相同的服务，注册到注册中心时，使用相同的服务名称company-server，由于是两个服务，所以项目的端口是不同的，其他相同。具体步骤如下：" class="headerlink" title="由于后续需要演示负载均衡，这里会创建两个项目company_server1，company_server2，这两个项目提供完全相同的服务，注册到注册中心时，使用相同的服务名称company-server，由于是两个服务，所以项目的端口是不同的，其他相同。具体步骤如下："></a>由于后续需要演示负载均衡，这里会创建两个项目company_server1，company_server2，这两个项目提供完全相同的服务，注册到注册中心时，使用相同的服务名称company-server，由于是两个服务，所以项目的端口是不同的，其他相同。具体步骤如下：</h5><h3 id="1-新建项目"><a href="#1-新建项目" class="headerlink" title="1.新建项目"></a>1.新建项目</h3><p>新建一个SpringBoot项目company_server1。</p>
+<h3 id="2-引入eureka依赖"><a href="#2-引入eureka依赖" class="headerlink" title="2.引入eureka依赖"></a>2.引入eureka依赖</h3><p>eureka-client依赖：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">&lt;!--eureka client--&gt;</span><br><span class="line">&lt;dependency&gt;</span><br><span class="line">	&lt;groupId&gt;org.springframework.cloud&lt;/groupId&gt;</span><br><span class="line">	&lt;artifactId&gt;spring-cloud-starter-netflix-eureka-client&lt;/artifactId&gt;</span><br><span class="line">&lt;/dependency&gt;</span><br></pre></td></tr></table></figure>
+
+<p>springcloud依赖，在<dependencies>    </dependencies>标签外面：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">&lt;!--springcloud依赖管理--&gt;</span><br><span class="line">&lt;dependencyManagement&gt;</span><br><span class="line">	&lt;dependencies&gt;</span><br><span class="line">		&lt;dependency&gt;</span><br><span class="line">			&lt;groupId&gt;org.springframework.cloud&lt;/groupId&gt;</span><br><span class="line">			&lt;artifactId&gt;spring-cloud-dependencies&lt;/artifactId&gt;</span><br><span class="line">			&lt;version&gt;$&#123;spring-cloud.version&#125;&lt;/version&gt;</span><br><span class="line">			&lt;type&gt;pom&lt;/type&gt;</span><br><span class="line">			&lt;scope&gt;import&lt;/scope&gt;</span><br><span class="line">		&lt;/dependency&gt;</span><br><span class="line">	&lt;/dependencies&gt;</span><br><span class="line">&lt;/dependencyManagement&gt;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&lt;spring-cloud.version&gt;Finchley.SR2&lt;/spring-cloud.version&gt;</span><br></pre></td></tr></table></figure>
+
+<h3 id="3-添加注解"><a href="#3-添加注解" class="headerlink" title="3.添加注解"></a>3.添加注解</h3><p>在启动类添加注解@EnableEurekaClient，将项目启动为一个以eureka做注册中心的服务。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">@EnableEurekaClient</span><br><span class="line">@SpringBootApplication</span><br><span class="line">public class CompanyServer1Application &#123;</span><br><span class="line"></span><br><span class="line">	public static void main(String[] args) &#123;</span><br><span class="line">		SpringApplication.run(CompanyServer1Application.class, args);</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="4-修改配置文件"><a href="#4-修改配置文件" class="headerlink" title="4.修改配置文件"></a>4.修改配置文件</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">server:</span><br><span class="line">  port: 8011</span><br><span class="line">spring:</span><br><span class="line">  application:</span><br><span class="line">    name: company-server</span><br><span class="line">eureka:</span><br><span class="line">  client:</span><br><span class="line">    service-url:</span><br><span class="line">      defaultZone: http://localhost:8761/eureka</span><br></pre></td></tr></table></figure>
+
+<p>name: company-server，就是把此项目注册到注册中心时，服务名为company-server，后面其他项目，通过这个服务名称，就能找到这个服务，而不需要通过ip:port。</p>
+<h3 id="5-新建一个controller，提供一个服务接口"><a href="#5-新建一个controller，提供一个服务接口" class="headerlink" title="5.新建一个controller，提供一个服务接口"></a>5.新建一个controller，提供一个服务接口</h3><p>我们新建一个controller包，下面建一个CompanyController，里面写一个服务接口，对外提供服务，代码如下:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">@RestController</span><br><span class="line">@RequestMapping(&quot;company&quot;)</span><br><span class="line">public class CompanyController &#123;</span><br><span class="line"></span><br><span class="line">  @Value(&quot;$&#123;server.port&#125;&quot;)</span><br><span class="line">  String port;</span><br><span class="line"></span><br><span class="line">  @GetMapping(&quot;get&quot;)</span><br><span class="line">  public String getCompany(Integer id)&#123;</span><br><span class="line">    return &quot;port:&quot;+port+&quot;,企业信息为：阿里巴巴&quot;+id;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="6-启动项目"><a href="#6-启动项目" class="headerlink" title="6.启动项目"></a>6.启动项目</h3><p>启动项目，会发现项目注册到了注册中心上：<br><img src="https://img-blog.csdnimg.cn/20181124100403157.png" alt="在这里插入图片描述"><br>访问接口<a href="http://localhost:8011/company/get?id=2，发现接口也可以提供服务。" target="_blank" rel="noopener">http://localhost:8011/company/get?id=2，发现接口也可以提供服务。</a><br><img src="https://img-blog.csdnimg.cn/20181124100434772.png" alt="在这里插入图片描述"><br>然后我们再写一个相同的服务，步骤和上面一样，端口改为8014，注册时，服务名和上面一样，也是company-server，提供相同的服务，方便后面演示负载均衡。</p>
+<p>下一篇：<a href="https://blog.csdn.net/weixin_39800144/article/details/84638394" target="_blank" rel="noopener">SpringCloud教程(Finchley版本)-03：负载均衡（Ribbon）</a><br>完整源码参考：<a href="https://github.com/myJava4all/springcloudfinchley" target="_blank" rel="noopener">https://github.com/myJava4all/springcloudfinchley</a></p>
+
+            <div class="post-copyright">
+    <div class="content">
+        <p>最后更新： 2020年01月14日 19:02</p>
+        <p>原始链接： <a class="post-url" href="/2018/01/02/SpringCloud教程(Finchley版本)-02：服务消费者/" title="SpringCloud教程(Finchley版本)-02：服务消费者">https://java4all.cn/2018/01/02/SpringCloud教程(Finchley版本)-02：服务消费者/</a></p>
+        <footer>
+            <a href="https://java4all.cn">
+                <img src="/images/logo3.jpg" alt="IT云清">
+                IT云清
+            </a>
+        </footer>
+    </div>
+</div>
+
+      
+        
+            
+
+        
+    </div>
+    <footer class="article-footer">
+        
+        
+<div class="post-share">
+    <a href="javascript:;" id="share-sub" class="post-share-fab">
+        <i class="fa fa-share-alt"></i>
+    </a>
+    <div class="post-share-list" id="share-list">
+        <ul class="share-icons">
+          <li>
+            <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=https://java4all.cn/2018/01/02/SpringCloud教程(Finchley版本)-02：服务消费者/&title=《SpringCloud教程(Finchley版本)-02：服务消费者》 — Hexo&pic=https://java4all.cn/images/电脑4.jpg" data-title="微博">
+              <i class="fa fa-weibo"></i>
+            </a>
+          </li>
+          <li>
+            <a class="weixin share-sns" id="wxFab" href="javascript:;" data-title="微信">
+              <i class="fa fa-weixin"></i>
+            </a>
+          </li>
+          <li>
+            <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=https://java4all.cn/2018/01/02/SpringCloud教程(Finchley版本)-02：服务消费者/&title=《SpringCloud教程(Finchley版本)-02：服务消费者》 — Hexo&source=" data-title="QQ">
+              <i class="fa fa-qq"></i>
+            </a>
+          </li>
+          <li>
+            <a class="facebook share-sns" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=https://java4all.cn/2018/01/02/SpringCloud教程(Finchley版本)-02：服务消费者/" data-title="Facebook">
+              <i class="fa fa-facebook"></i>
+            </a>
+          </li>
+          <li>
+            <a class="twitter share-sns" target="_blank" href="https://twitter.com/intent/tweet?text=《SpringCloud教程(Finchley版本)-02：服务消费者》 — Hexo&url=https://java4all.cn/2018/01/02/SpringCloud教程(Finchley版本)-02：服务消费者/&via=https://java4all.cn" data-title="Twitter">
+              <i class="fa fa-twitter"></i>
+            </a>
+          </li>
+          <li>
+            <a class="google share-sns" target="_blank" href="https://plus.google.com/share?url=https://java4all.cn/2018/01/02/SpringCloud教程(Finchley版本)-02：服务消费者/" data-title="Google+">
+              <i class="fa fa-google-plus"></i>
+            </a>
+          </li>
+        </ul>
+     </div>
+</div>
+<div class="post-modal wx-share" id="wxShare">
+    <a class="close" href="javascript:;" id="wxShare-close">×</a>
+    <p>扫一扫，分享到微信</p>
+    <img src="//api.qrserver.com/v1/create-qr-code/?data=https://java4all.cn/2018/01/02/SpringCloud教程(Finchley版本)-02：服务消费者/" alt="微信分享二维码">
+</div>
+
+<div class="mask"></div>
+
+        
+        <ul class="article-footer-menu">
+            
+            
+  <li class="article-footer-tags">
+    <i class="fa fa-tags"></i>
+      
+    <a href="/tags/SpringCloud/" class="color2">SpringCloud</a>
+      
+  </li>
+
+        </ul>
+        
+    </footer>
+  </div>
+</article>
+
+
+    <aside class="post-toc-pos post-toc-top" id="post-toc">
+        <nav class="post-toc-wrap">
+            <ol class="post-toc"><li class="post-toc-item post-toc-level-5"><a class="post-toc-link" href="#本文，讲述如何将一个服务注册到eureka注册中心，主要分为以下几个步骤："><span class="post-toc-text">本文，讲述如何将一个服务注册到eureka注册中心，主要分为以下几个步骤：</span></a></li><li class="post-toc-item post-toc-level-5"><a class="post-toc-link" href="#由于后续需要演示负载均衡，这里会创建两个项目company-server1，company-server2，这两个项目提供完全相同的服务，注册到注册中心时，使用相同的服务名称company-server，由于是两个服务，所以项目的端口是不同的，其他相同。具体步骤如下："><span class="post-toc-text">由于后续需要演示负载均衡，这里会创建两个项目company_server1，company_server2，这两个项目提供完全相同的服务，注册到注册中心时，使用相同的服务名称company-server，由于是两个服务，所以项目的端口是不同的，其他相同。具体步骤如下：</span></a></li></ol></li></ol></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#1-新建项目"><span class="post-toc-text">1.新建项目</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#2-引入eureka依赖"><span class="post-toc-text">2.引入eureka依赖</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#3-添加注解"><span class="post-toc-text">3.添加注解</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#4-修改配置文件"><span class="post-toc-text">4.修改配置文件</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#5-新建一个controller，提供一个服务接口"><span class="post-toc-text">5.新建一个controller，提供一个服务接口</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#6-启动项目"><span class="post-toc-text">6.启动项目</span></a>
+        </nav>
+    </aside>
+    
+
+<nav id="article-nav">
+  
+    <a href="/2018/01/03/SpringCloud教程(Finchley版本)-03：负载均衡（Ribbon）/" id="article-nav-newer" class="article-nav-link-wrap">
+
+      <span class="article-nav-title">
+        <i class="fa fa-hand-o-left" aria-hidden="true"></i>
+        
+          SpringCloud教程(Finchley版本)-03：负载均衡（Ribbon）
+        
+      </span>
+    </a>
+  
+  
+    <a href="/2018/01/01/SpringCloud教程(Finchley版本)-01：服务注册与发现（Eureka）/" id="article-nav-older" class="article-nav-link-wrap">
+      <span class="article-nav-title">SpringCloud教程(Finchley版本)-01：服务注册与发现（Eureka）</span>
+      <i class="fa fa-hand-o-right" aria-hidden="true"></i>
+    </a>
+  
+</nav>
+
+
+
+    
+</section>
+        
+      </div>
+      <footer id="footer">
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      
+<p>
+    <span id="busuanzi_container_site_uv" style='display:none'>
+        今日访客数：<span id="busuanzi_value_site_uv"></span>
+    </span>
+    <span id="busuanzi_container_site_pv" style='display:none'>
+        今日访问量：<span id="busuanzi_value_site_pv"></span>
+    </span>
+</p>
+
+
+      <p>
+        Powered by  <a href="http://hexo.io/" target="_blank">Hexo</a>
+        Theme <a href="//github.com/wongminho/hexo-theme-miho" target="_blank">MiHo</a>
+      &copy; 2020 IT云清<br>
+      </p>
+    </div>
+  </div>
+</footer>
+    <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+<script src="//cdn.bootcss.com/jquery/3.2.1/jquery.min.js"></script>
+<script>
+  var mihoConfig = {
+      root: "https://java4all.cn",
+      animate: true,
+      isHome: false,
+      share: true,
+      reward: 0
+  }
+</script>
+<div class="sidebar">
+    <div id="sidebar-search" title="Search">
+        <i class="fa fa-search"></i>
+    </div>
+    <div id="sidebar-category" title="Categories">
+        <i class="fa fa-book"></i>
+    </div>
+    <div id="sidebar-tag" title="Tags">
+        <i class="fa fa-tags"></i>
+    </div>
+    <div id="sidebar-top">
+        <span class="sidebar-top-icon"><i class="fa fa-angle-up"></i></span>
+    </div>
+</div>
+<div class="sidebar-menu-box" id="sidebar-menu-box">
+    <div class="sidebar-menu-box-container">
+        <div id="sidebar-menu-box-categories">
+            <a class="category-link" href="/categories/Seata/">Seata</a><a class="category-link" href="/categories/SpringCloud/">SpringCloud</a><a class="category-link" href="/categories/管理/">管理</a>
+        </div>
+        <div id="sidebar-menu-box-tags">
+            <a href="/tags/Eureka/" style="font-size: 10px;">Eureka</a> <a href="/tags/Java/" style="font-size: 15px;">Java</a> <a href="/tags/Ribbon/" style="font-size: 10px;">Ribbon</a> <a href="/tags/Seata/" style="font-size: 10px;">Seata</a> <a href="/tags/SpringCloud/" style="font-size: 20px;">SpringCloud</a> <a href="/tags/code-review/" style="font-size: 10px;">code review</a> <a href="/tags/管理/" style="font-size: 10px;">管理</a>
+        </div>
+    </div>
+    <a href="javascript:;" class="sidebar-menu-box-close">&times;</a>
+</div>
+<div class="mobile-header-menu-nav" id="mobile-header-menu-nav">
+    <div class="mobile-header-menu-container">
+        <span class="title">Menus</span>
+        <ul class="mobile-header-menu-navbar">
+            
+            <li>
+                <a  href="/">
+                    <i class="fa fa-home"></i><span>Home</span>
+                </a>
+            </li>
+            
+            <li>
+                <a  href="/archives">
+                    <i class="fa fa-archive"></i><span>Archives</span>
+                </a>
+            </li>
+            
+            <li>
+                <a  href="/about">
+                    <i class="fa fa-user"></i><span>About</span>
+                </a>
+            </li>
+            
+        </ul>
+    </div>
+    <div class="mobile-header-tag-container">
+        <span class="title">Tags</span>
+        <div id="mobile-header-container-tags">
+            <a href="/tags/Eureka/" style="font-size: 10px;">Eureka</a> <a href="/tags/Java/" style="font-size: 15px;">Java</a> <a href="/tags/Ribbon/" style="font-size: 10px;">Ribbon</a> <a href="/tags/Seata/" style="font-size: 10px;">Seata</a> <a href="/tags/SpringCloud/" style="font-size: 20px;">SpringCloud</a> <a href="/tags/code-review/" style="font-size: 10px;">code review</a> <a href="/tags/管理/" style="font-size: 10px;">管理</a>
+        </div>
+    </div>
+</div>
+<div class="search-wrap">
+    <span class="search-close">&times;</span>
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="back">
+            <i class="icon icon-lg icon-chevron-left"></i>
+        </a>
+        <input class="search-field" placeholder="Search..." id="keywords">
+        <a id="search-submit" href="javascript:;">
+            <i class="fa fa-search"></i>
+        </a>
+    <div class="search-container" id="search-container">
+        <ul class="search-result" id="search-result">
+        </ul>
+    </div>
+</div>
+
+<div id="search-tpl">
+    <li class="search-result-item">
+        <a href="{url}" class="search-item-li">
+            <span class="search-item-li-title" title="{title}">{title}</span>
+        </a>
+    </li>
+</div>
+<script src="/js/search.js"></script>
+<script src="/js/main.js"></script>
+
+
+  <script src="//cdn.bootcss.com/particles.js/2.0.0/particles.min.js"></script>
+  <div id="particles"></div>
+  <script src="/js/particles.js"></script>
+
+
+
+
+
+
+
+  <link rel="stylesheet" href="//cdn.bootcss.com/animate.css/3.5.0/animate.min.css">
+  <script src="//cdn.bootcss.com/scrollReveal.js/3.0.5/scrollreveal.js"></script>
+  <script src="/js/animate.js"></script>
+
+
+  <script src="/js/pop-img.js"></script>
+  <script>
+     $(".article-entry p img").popImg();
+  </script>
+
+  </div>
+</body>
+</html>
