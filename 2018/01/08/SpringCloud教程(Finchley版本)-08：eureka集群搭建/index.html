@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html>
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="utf-8">
+  
+  <title>SpringCloud教程(Finchley版本)-08：eureka集群搭建 | Hexo</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  
+    <meta name="keywords" content="IT云清的博客">
+  
+  <meta name="description" content="在eureka的服务治理设计中，所有的节点既是服务提供方，也是服务消费方，注册中心也不例外。eureka server的高可用集群，其实就是将自己作为服务向其他注册中心注册自己，这样几个节点的eureka就可以互相注册，实现服务清单的互相同步，达到高可用的效果。 本文，记录在本地搭建2个eureka服务，互相注册为一个集群，生产环境可以部署更多的节点。示例中两个项目分别为eureka-server">
+<meta name="keywords" content="SpringCloud,eureka">
+<meta property="og:type" content="article">
+<meta property="og:title" content="SpringCloud教程(Finchley版本)-08：eureka集群搭建">
+<meta property="og:url" content="https://java4all.cn/2018/01/08/SpringCloud教程(Finchley版本)-08：eureka集群搭建/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="在eureka的服务治理设计中，所有的节点既是服务提供方，也是服务消费方，注册中心也不例外。eureka server的高可用集群，其实就是将自己作为服务向其他注册中心注册自己，这样几个节点的eureka就可以互相注册，实现服务清单的互相同步，达到高可用的效果。 本文，记录在本地搭建2个eureka服务，互相注册为一个集群，生产环境可以部署更多的节点。示例中两个项目分别为eureka-server">
+<meta property="og:locale" content="en">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/20190216155654336.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl8zOTgwMDE0NA==,size_16,color_FFFFFF,t_70">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/20190216155741600.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl8zOTgwMDE0NA==,size_16,color_FFFFFF,t_70">
+<meta property="og:updated_time" content="2020-01-14T11:38:51.337Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="SpringCloud教程(Finchley版本)-08：eureka集群搭建">
+<meta name="twitter:description" content="在eureka的服务治理设计中，所有的节点既是服务提供方，也是服务消费方，注册中心也不例外。eureka server的高可用集群，其实就是将自己作为服务向其他注册中心注册自己，这样几个节点的eureka就可以互相注册，实现服务清单的互相同步，达到高可用的效果。 本文，记录在本地搭建2个eureka服务，互相注册为一个集群，生产环境可以部署更多的节点。示例中两个项目分别为eureka-server">
+<meta name="twitter:image" content="https://img-blog.csdnimg.cn/20190216155654336.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl8zOTgwMDE0NA==,size_16,color_FFFFFF,t_70">
+  
+  
+    <link rel="icon" href="/my.icon">
+  
+  <link href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+  <link rel="stylesheet" href="/css/style.css">
+  <script src="/js/pace.min.js"></script>
+  
+
+  
+  
+
+</head>
+</html>
+<body>
+  <div id="container">
+      <header id="header">
+    <div id="banner"></div>
+    <div id="header-outer">
+        <div id="header-menu" class="header-menu-pos animated">
+            <div class="header-menu-container">
+                <a href="/" class="left">
+                    <span class="site-title">IT云清</span>
+                </a>
+                <nav id="header-menu-nav" class="right">
+                    
+                    <a  href="/">
+                        <i class="fa fa-home"></i>
+                        <span>Home</span>
+                    </a>
+                    
+                    <a  href="/archives">
+                        <i class="fa fa-archive"></i>
+                        <span>Archives</span>
+                    </a>
+                    
+                    <a  href="/about">
+                        <i class="fa fa-user"></i>
+                        <span>About</span>
+                    </a>
+                    
+                </nav>
+                <a class="mobile-header-menu-button">
+                    <i class="fa fa-bars"></i>
+                </a>
+            </div>
+        </div>
+        <div id="header-row">
+            <div id="logo">
+                <a href="/">
+                    <img src="/images/logo3.jpg" alt="logo">
+                </a>
+            </div>
+            <div class="header-info">
+                <div id="header-title">
+                    
+                    <h2>
+                        IT云清
+                    </h2>
+                    
+                </div>
+                <div id="header-description">
+                    
+                    <h3>
+                        专注于JAVA
+                    </h3>
+                    
+                </div>
+            </div>
+            <nav class="header-nav">
+                <div class="social">
+                    
+                        <a title="IT云清" target="_blank" href="//java4all.cn">
+                            <i class="fa fa-home fa-2x"></i></a>
+                    
+                        <a title="Github" target="_blank" href="//github.com/lightClouds917">
+                            <i class="fa fa-github fa-2x"></i></a>
+                    
+                        <a title="CSDN" target="_blank" href="//it4all.blog.csdn.net">
+                            <i class="fa fa-twitter fa-2x"></i></a>
+                    
+                        <a title="w1186355422"  ">
+                            <i class="fa fa-weixin fa-2x"></i></a>
+                    
+                </div>
+            </nav>
+        </div>
+    </div>
+</header>
+      <div class="outer">
+        <section id="main" class="body-wrap"><article id="post-SpringCloud教程(Finchley版本)-08：eureka集群搭建" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 class="post-title" itemprop="name">
+      SpringCloud教程(Finchley版本)-08：eureka集群搭建
+    </h1>
+    <div class="post-title-bar">
+      <ul>
+          
+              <li>
+                  <i class="fa fa-book"></i>
+                  
+                      <a href="/categories/SpringCloud/">SpringCloud</a>
+                  
+              </li>
+          
+        <li>
+          <i class="fa fa-calendar"></i>  2018-01-08
+        </li>
+        <li>
+          <i class="fa fa-eye"></i>
+          <span id="busuanzi_value_page_pv"></span>
+        </li>
+      </ul>
+    </div>
+  
+
+          
+      </header>
+    
+    <div class="article-entry post-content" itemprop="articleBody">
+      
+            
+            <p>在eureka的服务治理设计中，所有的节点既是服务提供方，也是服务消费方，注册中心也不例外。eureka server的高可用集群，其实就是将自己作为服务向其他注册中心注册自己，这样几个节点的eureka就可以互相注册，实现服务清单的互相同步，达到高可用的效果。</p>
+<p>本文，记录在本地搭建2个eureka服务，互相注册为一个集群，生产环境可以部署更多的节点。示例中两个项目分别为eureka-server，port为8761，和eureka-server1，port为8762。这里列出重点步骤。</p>
+<h3 id="1-引入依赖-eureka-server"><a href="#1-引入依赖-eureka-server" class="headerlink" title="1.引入依赖 eureka-server"></a>1.引入依赖 eureka-server</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">&lt;!--eureka-server--&gt;</span><br><span class="line">&lt;dependency&gt;</span><br><span class="line">	&lt;groupId&gt;org.springframework.cloud&lt;/groupId&gt;</span><br><span class="line">	&lt;artifactId&gt;spring-cloud-starter-netflix-eureka-server&lt;/artifactId&gt;</span><br><span class="line">&lt;/dependency&gt;</span><br></pre></td></tr></table></figure>
+
+<h3 id="2-启动类-eureka-server"><a href="#2-启动类-eureka-server" class="headerlink" title="2.启动类 eureka-server"></a>2.启动类 eureka-server</h3><p>添加注解</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">@EnableEurekaServer</span><br></pre></td></tr></table></figure>
+
+<h3 id="3-配置文件-eureka-server"><a href="#3-配置文件-eureka-server" class="headerlink" title="3.配置文件 eureka-server"></a>3.配置文件 eureka-server</h3><p>eureka-server注册到 eureka-server2上，并且，register-with-eureka: true， fetch-registry: true，两个参数，需要设置为true，让他们可以互相注册，同步服务清单；由于这里我使用的ip来做地址，而不是服务名，所以需要打开prefer-ip-address: true。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">server:</span><br><span class="line">  port: 8761</span><br><span class="line">spring:</span><br><span class="line">  application:</span><br><span class="line">    name: eureka-server</span><br><span class="line">eureka:</span><br><span class="line">  instance:</span><br><span class="line">    hostname: peer1</span><br><span class="line">    prefer-ip-address: true</span><br><span class="line">#    允许使用ip地址来定义注册中心的地址，默认是false</span><br><span class="line">  client:</span><br><span class="line">    register-with-eureka: true</span><br><span class="line">    fetch-registry: true</span><br><span class="line">    service-url:</span><br><span class="line">      defaultZone:  http://127.0.0.1:8762/eureka/</span><br><span class="line">  server:</span><br><span class="line">    enable-self-preservation: false</span><br><span class="line"># 默认情况下，eureka间隔60s将服务清单中没有续约的服务剔除（默认90s内没有续约），本地测试，关闭保护机制，直接让它实时剔除</span><br></pre></td></tr></table></figure>
+
+<h3 id="4-引入依赖-eureka-server2"><a href="#4-引入依赖-eureka-server2" class="headerlink" title="4.引入依赖 eureka-server2"></a>4.引入依赖 eureka-server2</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">&lt;!--eureka-server--&gt;</span><br><span class="line">&lt;dependency&gt;</span><br><span class="line">	&lt;groupId&gt;org.springframework.cloud&lt;/groupId&gt;</span><br><span class="line">	&lt;artifactId&gt;spring-cloud-starter-netflix-eureka-server&lt;/artifactId&gt;</span><br><span class="line">&lt;/dependency&gt;</span><br></pre></td></tr></table></figure>
+
+<h3 id="5-启动类-eureka-server2"><a href="#5-启动类-eureka-server2" class="headerlink" title="5.启动类 eureka-server2"></a>5.启动类 eureka-server2</h3><p>添加注解</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">@EnableEurekaServer</span><br></pre></td></tr></table></figure>
+
+<h3 id="6-配置文件-eureka-server2"><a href="#6-配置文件-eureka-server2" class="headerlink" title="6.配置文件 eureka-server2"></a>6.配置文件 eureka-server2</h3><p>eureka-server2注册到 eureka-server上，并且，register-with-eureka: true， fetch-registry: true，两个参数，需要设置为true，让他们可以互相注册，同步服务清单；由于这里我使用的ip来做地址，而不是服务名，所以需要打开prefer-ip-address: true。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">server:</span><br><span class="line">  port: 8762</span><br><span class="line">spring:</span><br><span class="line">  application:</span><br><span class="line">    name: eureka-server</span><br><span class="line">eureka:</span><br><span class="line">  instance:</span><br><span class="line">    hostname: peer2</span><br><span class="line">    prefer-ip-address: true</span><br><span class="line">#    允许使用ip地址来定义注册中心的地址，默认是false</span><br><span class="line">  client:</span><br><span class="line">    register-with-eureka: true</span><br><span class="line">    fetch-registry: true</span><br><span class="line">    service-url:</span><br><span class="line">      defaultZone:  http://127.0.0.1:8761/eureka/</span><br><span class="line">  server:</span><br><span class="line">    enable-self-preservation: false</span><br><span class="line"># 默认情况下，eureka间隔60s将服务清单中没有续约的服务剔除（默认90s内没有续约），本地测试，关闭保护机制，直接让它实时剔除</span><br></pre></td></tr></table></figure>
+
+<h3 id="7-服务注册"><a href="#7-服务注册" class="headerlink" title="7.服务注册"></a>7.服务注册</h3><p>在其他服务向eureka集群注册时，可以只注册到一个节点，也可以向多节点注册。因为集群中节点会自动同步服务列表，所以上述2种方式均可。<br>这里给出一个示例，比如company-server，向注册中心注册，写法如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">eureka:</span><br><span class="line">  client:</span><br><span class="line">    service-url:</span><br><span class="line">      default: http://127.0.0.1:8761/eureka</span><br></pre></td></tr></table></figure>
+
+<p>可以发现，注册到eureka集群，和注册到单体eureka上，对于注册者而言，是相同的，无需额外处理。当然，也可以如下，向多个节点注册：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">eureka:</span><br><span class="line">  client:</span><br><span class="line">    service-url:</span><br><span class="line">      default: http://127.0.0.1:8761/eureka，http://127.0.0.1:8762/eureka</span><br></pre></td></tr></table></figure>
+
+<p>这里采用第一种写法，注册完后，启动eureka集群（由于启动有先后，会报错，因为互相注册，对方可能还没起来，等都起来了，就好了），然后再启动company-server，访问2个注册中心，结果如下：<br><img src="https://img-blog.csdnimg.cn/20190216155654336.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl8zOTgwMDE0NA==,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"><br><img src="https://img-blog.csdnimg.cn/20190216155741600.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl8zOTgwMDE0NA==,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"><br>可以看到，尽管我们只向eureka-server注册了，但是eureka-server2也可以看到这个服务。</p>
+
+            <div class="post-copyright">
+    <div class="content">
+        <p>最后更新： 2020年01月14日 19:38</p>
+        <p>原始链接： <a class="post-url" href="/2018/01/08/SpringCloud教程(Finchley版本)-08：eureka集群搭建/" title="SpringCloud教程(Finchley版本)-08：eureka集群搭建">https://java4all.cn/2018/01/08/SpringCloud教程(Finchley版本)-08：eureka集群搭建/</a></p>
+        <footer>
+            <a href="https://java4all.cn">
+                <img src="/images/logo3.jpg" alt="IT云清">
+                IT云清
+            </a>
+        </footer>
+    </div>
+</div>
+
+      
+        
+            
+
+        
+    </div>
+    <footer class="article-footer">
+        
+        
+<div class="post-share">
+    <a href="javascript:;" id="share-sub" class="post-share-fab">
+        <i class="fa fa-share-alt"></i>
+    </a>
+    <div class="post-share-list" id="share-list">
+        <ul class="share-icons">
+          <li>
+            <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=https://java4all.cn/2018/01/08/SpringCloud教程(Finchley版本)-08：eureka集群搭建/&title=《SpringCloud教程(Finchley版本)-08：eureka集群搭建》 — Hexo&pic=https://java4all.cn/images/电脑1.jpg" data-title="微博">
+              <i class="fa fa-weibo"></i>
+            </a>
+          </li>
+          <li>
+            <a class="weixin share-sns" id="wxFab" href="javascript:;" data-title="微信">
+              <i class="fa fa-weixin"></i>
+            </a>
+          </li>
+          <li>
+            <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=https://java4all.cn/2018/01/08/SpringCloud教程(Finchley版本)-08：eureka集群搭建/&title=《SpringCloud教程(Finchley版本)-08：eureka集群搭建》 — Hexo&source=" data-title="QQ">
+              <i class="fa fa-qq"></i>
+            </a>
+          </li>
+          <li>
+            <a class="facebook share-sns" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=https://java4all.cn/2018/01/08/SpringCloud教程(Finchley版本)-08：eureka集群搭建/" data-title="Facebook">
+              <i class="fa fa-facebook"></i>
+            </a>
+          </li>
+          <li>
+            <a class="twitter share-sns" target="_blank" href="https://twitter.com/intent/tweet?text=《SpringCloud教程(Finchley版本)-08：eureka集群搭建》 — Hexo&url=https://java4all.cn/2018/01/08/SpringCloud教程(Finchley版本)-08：eureka集群搭建/&via=https://java4all.cn" data-title="Twitter">
+              <i class="fa fa-twitter"></i>
+            </a>
+          </li>
+          <li>
+            <a class="google share-sns" target="_blank" href="https://plus.google.com/share?url=https://java4all.cn/2018/01/08/SpringCloud教程(Finchley版本)-08：eureka集群搭建/" data-title="Google+">
+              <i class="fa fa-google-plus"></i>
+            </a>
+          </li>
+        </ul>
+     </div>
+</div>
+<div class="post-modal wx-share" id="wxShare">
+    <a class="close" href="javascript:;" id="wxShare-close">×</a>
+    <p>扫一扫，分享到微信</p>
+    <img src="//api.qrserver.com/v1/create-qr-code/?data=https://java4all.cn/2018/01/08/SpringCloud教程(Finchley版本)-08：eureka集群搭建/" alt="微信分享二维码">
+</div>
+
+<div class="mask"></div>
+
+        
+        <ul class="article-footer-menu">
+            
+            
+  <li class="article-footer-tags">
+    <i class="fa fa-tags"></i>
+      
+    <a href="/tags/SpringCloud/" class="color2">SpringCloud</a>
+      
+    <a href="/tags/eureka/" class="color2">eureka</a>
+      
+  </li>
+
+        </ul>
+        
+    </footer>
+  </div>
+</article>
+
+
+    <aside class="post-toc-pos post-toc-top" id="post-toc">
+        <nav class="post-toc-wrap">
+            <ol class="post-toc"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#1-引入依赖-eureka-server"><span class="post-toc-text">1.引入依赖 eureka-server</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#2-启动类-eureka-server"><span class="post-toc-text">2.启动类 eureka-server</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#3-配置文件-eureka-server"><span class="post-toc-text">3.配置文件 eureka-server</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#4-引入依赖-eureka-server2"><span class="post-toc-text">4.引入依赖 eureka-server2</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#5-启动类-eureka-server2"><span class="post-toc-text">5.启动类 eureka-server2</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#6-配置文件-eureka-server2"><span class="post-toc-text">6.配置文件 eureka-server2</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#7-服务注册"><span class="post-toc-text">7.服务注册</span></a></li></ol>
+        </nav>
+    </aside>
+    
+
+<nav id="article-nav">
+  
+    <a href="/2020/01/05/Seata1.0版本整合教程/" id="article-nav-newer" class="article-nav-link-wrap">
+
+      <span class="article-nav-title">
+        <i class="fa fa-hand-o-left" aria-hidden="true"></i>
+        
+          Seata 1.0版本整合SpringCloud教程
+        
+      </span>
+    </a>
+  
+  
+    <a href="/2018/01/07/SpringCloud教程(Finchley版本)-07：网关（Zuul）/" id="article-nav-older" class="article-nav-link-wrap">
+      <span class="article-nav-title">SpringCloud教程(Finchley版本)-07：网关（Zuul）</span>
+      <i class="fa fa-hand-o-right" aria-hidden="true"></i>
+    </a>
+  
+</nav>
+
+
+
+    
+</section>
+        
+      </div>
+      <footer id="footer">
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      
+<p>
+    <span id="busuanzi_container_site_uv" style='display:none'>
+        今日访客数：<span id="busuanzi_value_site_uv"></span>
+    </span>
+    <span id="busuanzi_container_site_pv" style='display:none'>
+        今日访问量：<span id="busuanzi_value_site_pv"></span>
+    </span>
+</p>
+
+
+      <p>
+        Powered by  <a href="http://hexo.io/" target="_blank">Hexo</a>
+        Theme <a href="//github.com/wongminho/hexo-theme-miho" target="_blank">MiHo</a>
+      &copy; 2020 IT云清<br>
+      </p>
+    </div>
+  </div>
+</footer>
+    <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+<script src="//cdn.bootcss.com/jquery/3.2.1/jquery.min.js"></script>
+<script>
+  var mihoConfig = {
+      root: "https://java4all.cn",
+      animate: true,
+      isHome: false,
+      share: true,
+      reward: 0
+  }
+</script>
+<div class="sidebar">
+    <div id="sidebar-search" title="Search">
+        <i class="fa fa-search"></i>
+    </div>
+    <div id="sidebar-category" title="Categories">
+        <i class="fa fa-book"></i>
+    </div>
+    <div id="sidebar-tag" title="Tags">
+        <i class="fa fa-tags"></i>
+    </div>
+    <div id="sidebar-top">
+        <span class="sidebar-top-icon"><i class="fa fa-angle-up"></i></span>
+    </div>
+</div>
+<div class="sidebar-menu-box" id="sidebar-menu-box">
+    <div class="sidebar-menu-box-container">
+        <div id="sidebar-menu-box-categories">
+            <a class="category-link" href="/categories/Seata/">Seata</a><a class="category-link" href="/categories/SpringCloud/">SpringCloud</a><a class="category-link" href="/categories/管理/">管理</a>
+        </div>
+        <div id="sidebar-menu-box-tags">
+            <a href="/tags/Eureka/" style="font-size: 10px;">Eureka</a> <a href="/tags/Feign/" style="font-size: 15px;">Feign</a> <a href="/tags/Hystrix/" style="font-size: 15px;">Hystrix</a> <a href="/tags/Java/" style="font-size: 15px;">Java</a> <a href="/tags/Ribbon/" style="font-size: 15px;">Ribbon</a> <a href="/tags/Seata/" style="font-size: 10px;">Seata</a> <a href="/tags/SpringCloud/" style="font-size: 20px;">SpringCloud</a> <a href="/tags/Zuul/" style="font-size: 10px;">Zuul</a> <a href="/tags/code-review/" style="font-size: 10px;">code review</a> <a href="/tags/eureka/" style="font-size: 10px;">eureka</a> <a href="/tags/管理/" style="font-size: 10px;">管理</a>
+        </div>
+    </div>
+    <a href="javascript:;" class="sidebar-menu-box-close">&times;</a>
+</div>
+<div class="mobile-header-menu-nav" id="mobile-header-menu-nav">
+    <div class="mobile-header-menu-container">
+        <span class="title">Menus</span>
+        <ul class="mobile-header-menu-navbar">
+            
+            <li>
+                <a  href="/">
+                    <i class="fa fa-home"></i><span>Home</span>
+                </a>
+            </li>
+            
+            <li>
+                <a  href="/archives">
+                    <i class="fa fa-archive"></i><span>Archives</span>
+                </a>
+            </li>
+            
+            <li>
+                <a  href="/about">
+                    <i class="fa fa-user"></i><span>About</span>
+                </a>
+            </li>
+            
+        </ul>
+    </div>
+    <div class="mobile-header-tag-container">
+        <span class="title">Tags</span>
+        <div id="mobile-header-container-tags">
+            <a href="/tags/Eureka/" style="font-size: 10px;">Eureka</a> <a href="/tags/Feign/" style="font-size: 15px;">Feign</a> <a href="/tags/Hystrix/" style="font-size: 15px;">Hystrix</a> <a href="/tags/Java/" style="font-size: 15px;">Java</a> <a href="/tags/Ribbon/" style="font-size: 15px;">Ribbon</a> <a href="/tags/Seata/" style="font-size: 10px;">Seata</a> <a href="/tags/SpringCloud/" style="font-size: 20px;">SpringCloud</a> <a href="/tags/Zuul/" style="font-size: 10px;">Zuul</a> <a href="/tags/code-review/" style="font-size: 10px;">code review</a> <a href="/tags/eureka/" style="font-size: 10px;">eureka</a> <a href="/tags/管理/" style="font-size: 10px;">管理</a>
+        </div>
+    </div>
+</div>
+<div class="search-wrap">
+    <span class="search-close">&times;</span>
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="back">
+            <i class="icon icon-lg icon-chevron-left"></i>
+        </a>
+        <input class="search-field" placeholder="Search..." id="keywords">
+        <a id="search-submit" href="javascript:;">
+            <i class="fa fa-search"></i>
+        </a>
+    <div class="search-container" id="search-container">
+        <ul class="search-result" id="search-result">
+        </ul>
+    </div>
+</div>
+
+<div id="search-tpl">
+    <li class="search-result-item">
+        <a href="{url}" class="search-item-li">
+            <span class="search-item-li-title" title="{title}">{title}</span>
+        </a>
+    </li>
+</div>
+<script src="/js/search.js"></script>
+<script src="/js/main.js"></script>
+
+
+  <script src="//cdn.bootcss.com/particles.js/2.0.0/particles.min.js"></script>
+  <div id="particles"></div>
+  <script src="/js/particles.js"></script>
+
+
+
+
+
+
+
+  <link rel="stylesheet" href="//cdn.bootcss.com/animate.css/3.5.0/animate.min.css">
+  <script src="//cdn.bootcss.com/scrollReveal.js/3.0.5/scrollreveal.js"></script>
+  <script src="/js/animate.js"></script>
+
+
+  <script src="/js/pop-img.js"></script>
+  <script>
+     $(".article-entry p img").popImg();
+  </script>
+
+  </div>
+</body>
+</html>
