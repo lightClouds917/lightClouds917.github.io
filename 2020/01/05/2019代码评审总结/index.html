@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html>
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="utf-8">
+  
+  <title>code review问题总结 | Hexo</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  
+    <meta name="keywords" content="IT云清的博客">
+  
+  <meta name="description" content="2019年组织团队成员进行过多次code review，常见出现问题总结如下： 1.变量及命名1.魔法值不要使用魔法值，需要使用的常量提前给出定义。 2.命名规范变量名，方法名，常量等，按照各自规范来，这是基本规范。（可参考：阿里JAVA开发手册-编程规约-命名规范）； 3.枚举使用有业务含义的常量，要定义为枚举，不要仅仅定义为常量。 比如，借款审核状态，有审核中，被拒绝，被关闭，审核通过等多种状">
+<meta name="keywords" content="code review,Java,管理">
+<meta property="og:type" content="article">
+<meta property="og:title" content="code review问题总结">
+<meta property="og:url" content="https://java4all.cn/2020/01/05/2019代码评审总结/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="2019年组织团队成员进行过多次code review，常见出现问题总结如下： 1.变量及命名1.魔法值不要使用魔法值，需要使用的常量提前给出定义。 2.命名规范变量名，方法名，常量等，按照各自规范来，这是基本规范。（可参考：阿里JAVA开发手册-编程规约-命名规范）； 3.枚举使用有业务含义的常量，要定义为枚举，不要仅仅定义为常量。 比如，借款审核状态，有审核中，被拒绝，被关闭，审核通过等多种状">
+<meta property="og:locale" content="en">
+<meta property="og:updated_time" content="2020-01-14T08:39:03.736Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="code review问题总结">
+<meta name="twitter:description" content="2019年组织团队成员进行过多次code review，常见出现问题总结如下： 1.变量及命名1.魔法值不要使用魔法值，需要使用的常量提前给出定义。 2.命名规范变量名，方法名，常量等，按照各自规范来，这是基本规范。（可参考：阿里JAVA开发手册-编程规约-命名规范）； 3.枚举使用有业务含义的常量，要定义为枚举，不要仅仅定义为常量。 比如，借款审核状态，有审核中，被拒绝，被关闭，审核通过等多种状">
+  
+  
+    <link rel="icon" href="/my.icon">
+  
+  <link href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+  <link rel="stylesheet" href="/css/style.css">
+  <script src="/js/pace.min.js"></script>
+  
+
+  
+  
+
+</head>
+</html>
+<body>
+  <div id="container">
+      <header id="header">
+    <div id="banner"></div>
+    <div id="header-outer">
+        <div id="header-menu" class="header-menu-pos animated">
+            <div class="header-menu-container">
+                <a href="/" class="left">
+                    <span class="site-title">IT云清</span>
+                </a>
+                <nav id="header-menu-nav" class="right">
+                    
+                    <a  href="/">
+                        <i class="fa fa-home"></i>
+                        <span>Home</span>
+                    </a>
+                    
+                    <a  href="/archives">
+                        <i class="fa fa-archive"></i>
+                        <span>Archives</span>
+                    </a>
+                    
+                    <a  href="/about">
+                        <i class="fa fa-user"></i>
+                        <span>About</span>
+                    </a>
+                    
+                </nav>
+                <a class="mobile-header-menu-button">
+                    <i class="fa fa-bars"></i>
+                </a>
+            </div>
+        </div>
+        <div id="header-row">
+            <div id="logo">
+                <a href="/">
+                    <img src="/images/logo3.jpg" alt="logo">
+                </a>
+            </div>
+            <div class="header-info">
+                <div id="header-title">
+                    
+                    <h2>
+                        IT云清
+                    </h2>
+                    
+                </div>
+                <div id="header-description">
+                    
+                    <h3>
+                        专注于JAVA
+                    </h3>
+                    
+                </div>
+            </div>
+            <nav class="header-nav">
+                <div class="social">
+                    
+                        <a title="IT云清" target="_blank" href="//java4all.cn">
+                            <i class="fa fa-home fa-2x"></i></a>
+                    
+                        <a title="Github" target="_blank" href="//github.com/lightClouds917">
+                            <i class="fa fa-github fa-2x"></i></a>
+                    
+                        <a title="CSDN" target="_blank" href="//it4all.blog.csdn.net">
+                            <i class="fa fa-twitter fa-2x"></i></a>
+                    
+                        <a title="w1186355422"  ">
+                            <i class="fa fa-weixin fa-2x"></i></a>
+                    
+                </div>
+            </nav>
+        </div>
+    </div>
+</header>
+      <div class="outer">
+        <section id="main" class="body-wrap"><article id="post-2019代码评审总结" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 class="post-title" itemprop="name">
+      code review问题总结
+    </h1>
+    <div class="post-title-bar">
+      <ul>
+          
+              <li>
+                  <i class="fa fa-book"></i>
+                  
+                      <a href="/categories/管理/">管理</a>
+                  
+              </li>
+          
+        <li>
+          <i class="fa fa-calendar"></i>  2020-01-05
+        </li>
+        <li>
+          <i class="fa fa-eye"></i>
+          <span id="busuanzi_value_page_pv"></span>
+        </li>
+      </ul>
+    </div>
+  
+
+          
+      </header>
+    
+    <div class="article-entry post-content" itemprop="articleBody">
+      
+            
+            <p>2019年组织团队成员进行过多次code review，常见出现问题总结如下：</p>
+<h3 id="1-变量及命名"><a href="#1-变量及命名" class="headerlink" title="1.变量及命名"></a>1.变量及命名</h3><h5 id="1-魔法值"><a href="#1-魔法值" class="headerlink" title="1.魔法值"></a>1.魔法值</h5><p>不要使用魔法值，需要使用的常量提前给出定义。</p>
+<h5 id="2-命名规范"><a href="#2-命名规范" class="headerlink" title="2.命名规范"></a>2.命名规范</h5><p>变量名，方法名，常量等，按照各自规范来，这是基本规范。（可参考：阿里JAVA开发手册-编程规约-命名规范）；</p>
+<h5 id="3-枚举使用"><a href="#3-枚举使用" class="headerlink" title="3.枚举使用"></a>3.枚举使用</h5><p>有业务含义的常量，要定义为枚举，不要仅仅定义为常量。</p>
+<p>比如，借款审核状态，有审核中，被拒绝，被关闭，审核通过等多种状态，代码里做判断时，用ONE,TWO这种去判断，阅读代码时是没法理解业务含义的，还得去查这个的ONE究竟是什么含义，要定义借款审核状态的枚举类使用。</p>
+<h5 id="4-异步方法命名"><a href="#4-异步方法命名" class="headerlink" title="4.异步方法命名"></a>4.异步方法命名</h5><p>建议异步方法命名添加个async前缀，让上游调用方知道这个方法是个异步方法，以防使用出错。</p>
+<h5 id="5-git提交信息"><a href="#5-git提交信息" class="headerlink" title="5.git提交信息"></a>5.git提交信息</h5><p>禁止无意义的commit信息，如1，2，update等，没有任何业务含义。</p>
+<p>新增功能，修改功能，移除代码，格式化代码，重构，bugfix等，不同类型的操作，要加统一的前缀以区分，否则多分支并行开发时，合并个别提交时，难以摘取；且在code review时，难以区分本次提交的作用和目的，出问题时，回滚提交也难以区分；</p>
+<p>每次提交，应该尽量有业务边界的概念，不要在一次pr中，做多件事情；</p>
+<h3 id="2-远程调用"><a href="#2-远程调用" class="headerlink" title="2.远程调用"></a>2.远程调用</h3><h5 id="1-必须做状态校验"><a href="#1-必须做状态校验" class="headerlink" title="1.必须做状态校验"></a>1.必须做状态校验</h5><p>跨服务远程调用时，对于应答结果，上下游必须做好状态码的商定，下游调用时，必须去校验结果的状态，然后再解析处理。</p>
+<h5 id="2-NPE判断"><a href="#2-NPE判断" class="headerlink" title="2.NPE判断"></a>2.NPE判断</h5><p>不管上游是否做过特殊处理，下游调用时，必须自己做好NPE判断。</p>
+<h5 id="3-做好异常处理"><a href="#3-做好异常处理" class="headerlink" title="3.做好异常处理"></a>3.做好异常处理</h5><p>跨服务调用，异常高发，要做好异常的处理，是重试，还是根据异常类型做对应处理，需要下游自行做好处理。</p>
+<h5 id="4-入参出参记录"><a href="#4-入参出参记录" class="headerlink" title="4.入参出参记录"></a>4.入参出参记录</h5><p>调用前后的入参和出参埋点，出现问题可以及时还原案发现场；如果日志量较大，可以按特定比例（可调整）打印，比如只打印1/20日志。</p>
+<h5 id="5-尽量少在大循环里做跨服务调用"><a href="#5-尽量少在大循环里做跨服务调用" class="headerlink" title="5.尽量少在大循环里做跨服务调用"></a>5.尽量少在大循环里做跨服务调用</h5><p>如果需要在循环中多次调用，建议尝试将单条拉取改为批量拉取，减少调用次数，提高响应速度。</p>
+<h3 id="3-异常处理"><a href="#3-异常处理" class="headerlink" title="3.异常处理"></a>3.异常处理</h3><h5 id="1-合理使用try-catch"><a href="#1-合理使用try-catch" class="headerlink" title="1.合理使用try catch"></a>1.合理使用try catch</h5><p>区分稳定代码和不稳定代码，对于稳定代码，不需要try , 不要把整个方法的逻辑都放在try里，出现问题时，难以定位。</p>
+<h5 id="2-合理使用日志级别"><a href="#2-合理使用日志级别" class="headerlink" title="2.合理使用日志级别"></a>2.合理使用日志级别</h5><p>不要全局都使用info级别，出现异常和警告等，使用对应的日志级别，否则出现问题时，本该在error日志中的信息跑到了info中，影响问题排查效率。</p>
+<h5 id="3-catch处理"><a href="#3-catch处理" class="headerlink" title="3.catch处理"></a>3.catch处理</h5><p>catch中，不要简单的留下个自定义字符串，比如“借款审核失败”；异常发生时，一定要记录异常堆栈，还要记录案发现场的入参出参等必要信息，方便还原案发现场。</p>
+<p>要避免，线上出现问题，日志只有一句话，为了排查问题，还得加日志加堆栈，然后发个版。</p>
+<h5 id="4-非主流程操作"><a href="#4-非主流程操作" class="headerlink" title="4.非主流程操作"></a>4.非主流程操作</h5><p>出现问题不影响主流程的操作，可以放在try catch里，比如向kafka发送打点日志，避免非主流程操作失败，导致主要业务失败。</p>
+<h5 id="5-告警机制"><a href="#5-告警机制" class="headerlink" title="5.告警机制"></a>5.告警机制</h5><p>部分核心操作，出现问题时，要添加相应的告警机制，比如短信，邮件，钉钉等，开发及时介入解决。</p>
+<h3 id="4-BigDecimal使用"><a href="#4-BigDecimal使用" class="headerlink" title="4.BigDecimal使用"></a>4.BigDecimal使用</h3><h5 id="1-常量定义"><a href="#1-常量定义" class="headerlink" title="1.常量定义"></a>1.常量定义</h5><p>合理使用构造函数，避免构造出精度缺失的常量。</p>
+<h5 id="2-精度问题"><a href="#2-精度问题" class="headerlink" title="2.精度问题"></a>2.精度问题</h5><p>除法计算时，要使用合理的函数，设置精度，避免无限小数这种结果导致异常。</p>
+<h3 id="5-基本规范"><a href="#5-基本规范" class="headerlink" title="5.基本规范"></a>5.基本规范</h3><h5 id="1-注释"><a href="#1-注释" class="headerlink" title="1.注释"></a>1.注释</h5><p>作者信息，方法注释等，按照规范来，禁止个性化省略，按照开发规范，风格统一。</p>
+<h5 id="2-方法大小"><a href="#2-方法大小" class="headerlink" title="2.方法大小"></a>2.方法大小</h5><p>适当做好拆分，做好复用，禁止一个方法几百行。</p>
+
+            <div class="post-copyright">
+    <div class="content">
+        <p>最后更新： 2020年01月14日 16:39</p>
+        <p>原始链接： <a class="post-url" href="/2020/01/05/2019代码评审总结/" title="code review问题总结">https://java4all.cn/2020/01/05/2019代码评审总结/</a></p>
+        <footer>
+            <a href="https://java4all.cn">
+                <img src="/images/logo3.jpg" alt="IT云清">
+                IT云清
+            </a>
+        </footer>
+    </div>
+</div>
+
+      
+        
+            
+
+        
+    </div>
+    <footer class="article-footer">
+        
+        
+<div class="post-share">
+    <a href="javascript:;" id="share-sub" class="post-share-fab">
+        <i class="fa fa-share-alt"></i>
+    </a>
+    <div class="post-share-list" id="share-list">
+        <ul class="share-icons">
+          <li>
+            <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=https://java4all.cn/2020/01/05/2019代码评审总结/&title=《code review问题总结》 — Hexo&pic=https://java4all.cn/images/logo2.jpg" data-title="微博">
+              <i class="fa fa-weibo"></i>
+            </a>
+          </li>
+          <li>
+            <a class="weixin share-sns" id="wxFab" href="javascript:;" data-title="微信">
+              <i class="fa fa-weixin"></i>
+            </a>
+          </li>
+          <li>
+            <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=https://java4all.cn/2020/01/05/2019代码评审总结/&title=《code review问题总结》 — Hexo&source=" data-title="QQ">
+              <i class="fa fa-qq"></i>
+            </a>
+          </li>
+          <li>
+            <a class="facebook share-sns" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=https://java4all.cn/2020/01/05/2019代码评审总结/" data-title="Facebook">
+              <i class="fa fa-facebook"></i>
+            </a>
+          </li>
+          <li>
+            <a class="twitter share-sns" target="_blank" href="https://twitter.com/intent/tweet?text=《code review问题总结》 — Hexo&url=https://java4all.cn/2020/01/05/2019代码评审总结/&via=https://java4all.cn" data-title="Twitter">
+              <i class="fa fa-twitter"></i>
+            </a>
+          </li>
+          <li>
+            <a class="google share-sns" target="_blank" href="https://plus.google.com/share?url=https://java4all.cn/2020/01/05/2019代码评审总结/" data-title="Google+">
+              <i class="fa fa-google-plus"></i>
+            </a>
+          </li>
+        </ul>
+     </div>
+</div>
+<div class="post-modal wx-share" id="wxShare">
+    <a class="close" href="javascript:;" id="wxShare-close">×</a>
+    <p>扫一扫，分享到微信</p>
+    <img src="//api.qrserver.com/v1/create-qr-code/?data=https://java4all.cn/2020/01/05/2019代码评审总结/" alt="微信分享二维码">
+</div>
+
+<div class="mask"></div>
+
+        
+        <ul class="article-footer-menu">
+            
+            
+  <li class="article-footer-tags">
+    <i class="fa fa-tags"></i>
+      
+    <a href="/tags/codereview/" class="color2">code review</a>
+      
+    <a href="/tags/Java/" class="color5">Java</a>
+      
+    <a href="/tags/管理/" class="color3">管理</a>
+      
+  </li>
+
+        </ul>
+        
+    </footer>
+  </div>
+</article>
+
+
+    <aside class="post-toc-pos post-toc-top" id="post-toc">
+        <nav class="post-toc-wrap">
+            <ol class="post-toc"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#1-变量及命名"><span class="post-toc-text">1.变量及命名</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-5"><a class="post-toc-link" href="#1-魔法值"><span class="post-toc-text">1.魔法值</span></a></li><li class="post-toc-item post-toc-level-5"><a class="post-toc-link" href="#2-命名规范"><span class="post-toc-text">2.命名规范</span></a></li><li class="post-toc-item post-toc-level-5"><a class="post-toc-link" href="#3-枚举使用"><span class="post-toc-text">3.枚举使用</span></a></li><li class="post-toc-item post-toc-level-5"><a class="post-toc-link" href="#4-异步方法命名"><span class="post-toc-text">4.异步方法命名</span></a></li><li class="post-toc-item post-toc-level-5"><a class="post-toc-link" href="#5-git提交信息"><span class="post-toc-text">5.git提交信息</span></a></li></ol></li></ol></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#2-远程调用"><span class="post-toc-text">2.远程调用</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-5"><a class="post-toc-link" href="#1-必须做状态校验"><span class="post-toc-text">1.必须做状态校验</span></a></li><li class="post-toc-item post-toc-level-5"><a class="post-toc-link" href="#2-NPE判断"><span class="post-toc-text">2.NPE判断</span></a></li><li class="post-toc-item post-toc-level-5"><a class="post-toc-link" href="#3-做好异常处理"><span class="post-toc-text">3.做好异常处理</span></a></li><li class="post-toc-item post-toc-level-5"><a class="post-toc-link" href="#4-入参出参记录"><span class="post-toc-text">4.入参出参记录</span></a></li><li class="post-toc-item post-toc-level-5"><a class="post-toc-link" href="#5-尽量少在大循环里做跨服务调用"><span class="post-toc-text">5.尽量少在大循环里做跨服务调用</span></a></li></ol></li></ol></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#3-异常处理"><span class="post-toc-text">3.异常处理</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-5"><a class="post-toc-link" href="#1-合理使用try-catch"><span class="post-toc-text">1.合理使用try catch</span></a></li><li class="post-toc-item post-toc-level-5"><a class="post-toc-link" href="#2-合理使用日志级别"><span class="post-toc-text">2.合理使用日志级别</span></a></li><li class="post-toc-item post-toc-level-5"><a class="post-toc-link" href="#3-catch处理"><span class="post-toc-text">3.catch处理</span></a></li><li class="post-toc-item post-toc-level-5"><a class="post-toc-link" href="#4-非主流程操作"><span class="post-toc-text">4.非主流程操作</span></a></li><li class="post-toc-item post-toc-level-5"><a class="post-toc-link" href="#5-告警机制"><span class="post-toc-text">5.告警机制</span></a></li></ol></li></ol></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#4-BigDecimal使用"><span class="post-toc-text">4.BigDecimal使用</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-5"><a class="post-toc-link" href="#1-常量定义"><span class="post-toc-text">1.常量定义</span></a></li><li class="post-toc-item post-toc-level-5"><a class="post-toc-link" href="#2-精度问题"><span class="post-toc-text">2.精度问题</span></a></li></ol></li></ol></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#5-基本规范"><span class="post-toc-text">5.基本规范</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-5"><a class="post-toc-link" href="#1-注释"><span class="post-toc-text">1.注释</span></a></li><li class="post-toc-item post-toc-level-5"><a class="post-toc-link" href="#2-方法大小"><span class="post-toc-text">2.方法大小</span></a></li></ol></li></ol></li></ol>
+        </nav>
+    </aside>
+    
+
+<nav id="article-nav">
+  
+  
+    <a href="/2020/01/05/Seata1.0版本整合教程/" id="article-nav-older" class="article-nav-link-wrap">
+      <span class="article-nav-title">Seata 1.0版本整合SpringCloud教程</span>
+      <i class="fa fa-hand-o-right" aria-hidden="true"></i>
+    </a>
+  
+</nav>
+
+
+
+    
+</section>
+        
+      </div>
+      <footer id="footer">
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      
+<p>
+    <span id="busuanzi_container_site_uv" style='display:none'>
+        今日访客数：<span id="busuanzi_value_site_uv"></span>
+    </span>
+    <span id="busuanzi_container_site_pv" style='display:none'>
+        今日访问量：<span id="busuanzi_value_site_pv"></span>
+    </span>
+</p>
+
+
+      <p>
+        Powered by  <a href="http://hexo.io/" target="_blank">Hexo</a>
+        Theme <a href="//github.com/wongminho/hexo-theme-miho" target="_blank">MiHo</a>
+      &copy; 2020 IT云清<br>
+      </p>
+    </div>
+  </div>
+</footer>
+    <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+<script src="//cdn.bootcss.com/jquery/3.2.1/jquery.min.js"></script>
+<script>
+  var mihoConfig = {
+      root: "https://java4all.cn",
+      animate: true,
+      isHome: false,
+      share: true,
+      reward: 0
+  }
+</script>
+<div class="sidebar">
+    <div id="sidebar-search" title="Search">
+        <i class="fa fa-search"></i>
+    </div>
+    <div id="sidebar-category" title="Categories">
+        <i class="fa fa-book"></i>
+    </div>
+    <div id="sidebar-tag" title="Tags">
+        <i class="fa fa-tags"></i>
+    </div>
+    <div id="sidebar-top">
+        <span class="sidebar-top-icon"><i class="fa fa-angle-up"></i></span>
+    </div>
+</div>
+<div class="sidebar-menu-box" id="sidebar-menu-box">
+    <div class="sidebar-menu-box-container">
+        <div id="sidebar-menu-box-categories">
+            <a class="category-link" href="/categories/Seata/">Seata</a><a class="category-link" href="/categories/管理/">管理</a>
+        </div>
+        <div id="sidebar-menu-box-tags">
+            <a href="/tags/Java/" style="font-size: 20px;">Java</a> <a href="/tags/Seata/" style="font-size: 10px;">Seata</a> <a href="/tags/SpringCloud/" style="font-size: 10px;">SpringCloud</a> <a href="/tags/code-review/" style="font-size: 10px;">code review</a> <a href="/tags/管理/" style="font-size: 10px;">管理</a>
+        </div>
+    </div>
+    <a href="javascript:;" class="sidebar-menu-box-close">&times;</a>
+</div>
+<div class="mobile-header-menu-nav" id="mobile-header-menu-nav">
+    <div class="mobile-header-menu-container">
+        <span class="title">Menus</span>
+        <ul class="mobile-header-menu-navbar">
+            
+            <li>
+                <a  href="/">
+                    <i class="fa fa-home"></i><span>Home</span>
+                </a>
+            </li>
+            
+            <li>
+                <a  href="/archives">
+                    <i class="fa fa-archive"></i><span>Archives</span>
+                </a>
+            </li>
+            
+            <li>
+                <a  href="/about">
+                    <i class="fa fa-user"></i><span>About</span>
+                </a>
+            </li>
+            
+        </ul>
+    </div>
+    <div class="mobile-header-tag-container">
+        <span class="title">Tags</span>
+        <div id="mobile-header-container-tags">
+            <a href="/tags/Java/" style="font-size: 20px;">Java</a> <a href="/tags/Seata/" style="font-size: 10px;">Seata</a> <a href="/tags/SpringCloud/" style="font-size: 10px;">SpringCloud</a> <a href="/tags/code-review/" style="font-size: 10px;">code review</a> <a href="/tags/管理/" style="font-size: 10px;">管理</a>
+        </div>
+    </div>
+</div>
+<div class="search-wrap">
+    <span class="search-close">&times;</span>
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="back">
+            <i class="icon icon-lg icon-chevron-left"></i>
+        </a>
+        <input class="search-field" placeholder="Search..." id="keywords">
+        <a id="search-submit" href="javascript:;">
+            <i class="fa fa-search"></i>
+        </a>
+    <div class="search-container" id="search-container">
+        <ul class="search-result" id="search-result">
+        </ul>
+    </div>
+</div>
+
+<div id="search-tpl">
+    <li class="search-result-item">
+        <a href="{url}" class="search-item-li">
+            <span class="search-item-li-title" title="{title}">{title}</span>
+        </a>
+    </li>
+</div>
+<script src="/js/search.js"></script>
+<script src="/js/main.js"></script>
+
+
+  <script src="//cdn.bootcss.com/particles.js/2.0.0/particles.min.js"></script>
+  <div id="particles"></div>
+  <script src="/js/particles.js"></script>
+
+
+
+
+
+
+
+  <link rel="stylesheet" href="//cdn.bootcss.com/animate.css/3.5.0/animate.min.css">
+  <script src="//cdn.bootcss.com/scrollReveal.js/3.0.5/scrollreveal.js"></script>
+  <script src="/js/animate.js"></script>
+
+
+  <script src="/js/pop-img.js"></script>
+  <script>
+     $(".article-entry p img").popImg();
+  </script>
+
+  </div>
+</body>
+</html>
