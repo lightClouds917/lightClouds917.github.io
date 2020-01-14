@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html>
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="utf-8">
+  
+  <title>SpringCloud教程(Finchley版本)-04：断路器（Hystrix-Ribbon） | Hexo</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  
+    <meta name="keywords" content="IT云清的博客">
+  
+  <meta name="description" content="在微服务系统中，我们把系统拆分成了很多小的服务，各个服务之间通过不同的方式进行依赖和调用，为了保证服务的高可用性，单个服务通常会集群部署，此时，许多服务由于各种问题可能会调用失败，比如超时、异常等。如何能够保证在一个依赖出问题的情况下，不会出现故障传播，导致整体服务失败，这个就是Hystrix需要做的事情。Hystrix提供了熔断、隔离、Fallback、cache、监控等功能，能够在一个、或多个">
+<meta name="keywords" content="SpringCloud,Ribbon,Hystrix">
+<meta property="og:type" content="article">
+<meta property="og:title" content="SpringCloud教程(Finchley版本)-04：断路器（Hystrix-Ribbon）">
+<meta property="og:url" content="https://java4all.cn/2018/01/04/SpringCloud教程(Finchley版本)-04：断路器（Hystrix-Ribbon）/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="在微服务系统中，我们把系统拆分成了很多小的服务，各个服务之间通过不同的方式进行依赖和调用，为了保证服务的高可用性，单个服务通常会集群部署，此时，许多服务由于各种问题可能会调用失败，比如超时、异常等。如何能够保证在一个依赖出问题的情况下，不会出现故障传播，导致整体服务失败，这个就是Hystrix需要做的事情。Hystrix提供了熔断、隔离、Fallback、cache、监控等功能，能够在一个、或多个">
+<meta property="og:locale" content="en">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/20181211160156742.png">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/20181211160207398.png">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/20181211160217240.png">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/20181211160223627.png">
+<meta property="og:updated_time" content="2020-01-14T11:07:12.063Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="SpringCloud教程(Finchley版本)-04：断路器（Hystrix-Ribbon）">
+<meta name="twitter:description" content="在微服务系统中，我们把系统拆分成了很多小的服务，各个服务之间通过不同的方式进行依赖和调用，为了保证服务的高可用性，单个服务通常会集群部署，此时，许多服务由于各种问题可能会调用失败，比如超时、异常等。如何能够保证在一个依赖出问题的情况下，不会出现故障传播，导致整体服务失败，这个就是Hystrix需要做的事情。Hystrix提供了熔断、隔离、Fallback、cache、监控等功能，能够在一个、或多个">
+<meta name="twitter:image" content="https://img-blog.csdnimg.cn/20181211160156742.png">
+  
+  
+    <link rel="icon" href="/my.icon">
+  
+  <link href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+  <link rel="stylesheet" href="/css/style.css">
+  <script src="/js/pace.min.js"></script>
+  
+
+  
+  
+
+</head>
+</html>
+<body>
+  <div id="container">
+      <header id="header">
+    <div id="banner"></div>
+    <div id="header-outer">
+        <div id="header-menu" class="header-menu-pos animated">
+            <div class="header-menu-container">
+                <a href="/" class="left">
+                    <span class="site-title">IT云清</span>
+                </a>
+                <nav id="header-menu-nav" class="right">
+                    
+                    <a  href="/">
+                        <i class="fa fa-home"></i>
+                        <span>Home</span>
+                    </a>
+                    
+                    <a  href="/archives">
+                        <i class="fa fa-archive"></i>
+                        <span>Archives</span>
+                    </a>
+                    
+                    <a  href="/about">
+                        <i class="fa fa-user"></i>
+                        <span>About</span>
+                    </a>
+                    
+                </nav>
+                <a class="mobile-header-menu-button">
+                    <i class="fa fa-bars"></i>
+                </a>
+            </div>
+        </div>
+        <div id="header-row">
+            <div id="logo">
+                <a href="/">
+                    <img src="/images/logo3.jpg" alt="logo">
+                </a>
+            </div>
+            <div class="header-info">
+                <div id="header-title">
+                    
+                    <h2>
+                        IT云清
+                    </h2>
+                    
+                </div>
+                <div id="header-description">
+                    
+                    <h3>
+                        专注于JAVA
+                    </h3>
+                    
+                </div>
+            </div>
+            <nav class="header-nav">
+                <div class="social">
+                    
+                        <a title="IT云清" target="_blank" href="//java4all.cn">
+                            <i class="fa fa-home fa-2x"></i></a>
+                    
+                        <a title="Github" target="_blank" href="//github.com/lightClouds917">
+                            <i class="fa fa-github fa-2x"></i></a>
+                    
+                        <a title="CSDN" target="_blank" href="//it4all.blog.csdn.net">
+                            <i class="fa fa-twitter fa-2x"></i></a>
+                    
+                        <a title="w1186355422"  ">
+                            <i class="fa fa-weixin fa-2x"></i></a>
+                    
+                </div>
+            </nav>
+        </div>
+    </div>
+</header>
+      <div class="outer">
+        <section id="main" class="body-wrap"><article id="post-SpringCloud教程(Finchley版本)-04：断路器（Hystrix-Ribbon）" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 class="post-title" itemprop="name">
+      SpringCloud教程(Finchley版本)-04：断路器（Hystrix-Ribbon）
+    </h1>
+    <div class="post-title-bar">
+      <ul>
+          
+              <li>
+                  <i class="fa fa-book"></i>
+                  
+                      <a href="/categories/SpringCloud/">SpringCloud</a>
+                  
+              </li>
+          
+        <li>
+          <i class="fa fa-calendar"></i>  2018-01-04
+        </li>
+        <li>
+          <i class="fa fa-eye"></i>
+          <span id="busuanzi_value_page_pv"></span>
+        </li>
+      </ul>
+    </div>
+  
+
+          
+      </header>
+    
+    <div class="article-entry post-content" itemprop="articleBody">
+      
+            
+            <p>在微服务系统中，我们把系统拆分成了很多小的服务，各个服务之间通过不同的方式进行依赖和调用，为了保证服务的高可用性，单个服务通常会集群部署，此时，许多服务由于各种问题可能会调用失败，比如超时、异常等。如何能够保证在一个依赖出问题的情况下，不会出现故障传播，导致整体服务失败，这个就是Hystrix需要做的事情。Hystrix提供了熔断、隔离、Fallback、cache、监控等功能，能够在一个、或多个依赖同时出现问题时保证系统依然可用。</p>
+<p>本文介绍如何结合上一文<a href="https://blog.csdn.net/weixin_39800144/article/details/84638394" target="_blank" rel="noopener">SpringCloud教程(Finchley版本)-03：负载均衡（Ribbon）</a>，使用Hystrix来实现断路器功能。主要分为以下几个步骤：</p>
+<ul>
+<li>1.创建项目</li>
+<li>2.引入依赖</li>
+<li>3.修改配置文件</li>
+<li>4.添加启动注解</li>
+<li>5.注入模板类</li>
+<li>6.跨服务调用</li>
+<li>7.启动项目，测试 </li>
+</ul>
+<h3 id="1-创建项目"><a href="#1-创建项目" class="headerlink" title="1.创建项目"></a>1.创建项目</h3><p>新建一个Springboot项目hystrix_ribbon_server1。</p>
+<h3 id="2-引入依赖"><a href="#2-引入依赖" class="headerlink" title="2.引入依赖"></a>2.引入依赖</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">&lt;!--eureka-client--&gt;</span><br><span class="line">&lt;dependency&gt;</span><br><span class="line">	&lt;groupId&gt;org.springframework.cloud&lt;/groupId&gt;</span><br><span class="line">	&lt;artifactId&gt;spring-cloud-starter-netflix-eureka-client&lt;/artifactId&gt;</span><br><span class="line">&lt;/dependency&gt;</span><br><span class="line"></span><br><span class="line">&lt;!--eureka ribbon--&gt;</span><br><span class="line">&lt;dependency&gt;</span><br><span class="line">	&lt;groupId&gt;org.springframework.cloud&lt;/groupId&gt;</span><br><span class="line">	&lt;artifactId&gt;spring-cloud-starter-netflix-ribbon&lt;/artifactId&gt;</span><br><span class="line">&lt;/dependency&gt;</span><br><span class="line"></span><br><span class="line">&lt;!--hystrix--&gt;</span><br><span class="line">&lt;dependency&gt;</span><br><span class="line">	&lt;groupId&gt;org.springframework.cloud&lt;/groupId&gt;</span><br><span class="line">	&lt;artifactId&gt;spring-cloud-starter-netflix-hystrix&lt;/artifactId&gt;</span><br><span class="line">&lt;/dependency&gt;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">&lt;!--springcloud依赖管理--&gt;</span><br><span class="line">&lt;dependencyManagement&gt;</span><br><span class="line">	&lt;dependencies&gt;</span><br><span class="line">		&lt;dependency&gt;</span><br><span class="line">			&lt;groupId&gt;org.springframework.cloud&lt;/groupId&gt;</span><br><span class="line">			&lt;artifactId&gt;spring-cloud-dependencies&lt;/artifactId&gt;</span><br><span class="line">			&lt;version&gt;$&#123;spring-cloud.version&#125;&lt;/version&gt;</span><br><span class="line">			&lt;type&gt;pom&lt;/type&gt;</span><br><span class="line">			&lt;scope&gt;import&lt;/scope&gt;</span><br><span class="line">		&lt;/dependency&gt;</span><br><span class="line">	&lt;/dependencies&gt;</span><br><span class="line">&lt;/dependencyManagement&gt;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&lt;spring-cloud.version&gt;Finchley.SR2&lt;/spring-cloud.version&gt;</span><br></pre></td></tr></table></figure>
+
+<h3 id="3-修改配置文件"><a href="#3-修改配置文件" class="headerlink" title="3.修改配置文件"></a>3.修改配置文件</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">server:</span><br><span class="line">  port: 8017</span><br><span class="line">spring:</span><br><span class="line">  application:</span><br><span class="line">    name: hystrix-ribbon-server</span><br><span class="line">eureka:</span><br><span class="line">  client:</span><br><span class="line">    service-url:</span><br><span class="line">      defaultZone: http://localhost:8761/eureka/</span><br></pre></td></tr></table></figure>
+
+<h3 id="4-添加启动注解"><a href="#4-添加启动注解" class="headerlink" title="4.添加启动注解"></a>4.添加启动注解</h3><h3 id="5-注入模板类"><a href="#5-注入模板类" class="headerlink" title="5.注入模板类"></a>5.注入模板类</h3><p>4.5步骤和前文的Ribbon一样。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line">package com.java4all.hystrix_ribbon_server1;</span><br><span class="line"></span><br><span class="line">import org.springframework.boot.SpringApplication;</span><br><span class="line">import org.springframework.boot.autoconfigure.SpringBootApplication;</span><br><span class="line">import org.springframework.cloud.client.loadbalancer.LoadBalanced;</span><br><span class="line">import org.springframework.cloud.netflix.eureka.EnableEurekaClient;</span><br><span class="line">import org.springframework.cloud.netflix.hystrix.EnableHystrix;</span><br><span class="line">import org.springframework.context.annotation.Bean;</span><br><span class="line">import org.springframework.web.client.RestTemplate;</span><br><span class="line"></span><br><span class="line">@EnableHystrix</span><br><span class="line">@EnableEurekaClient</span><br><span class="line">@SpringBootApplication</span><br><span class="line">public class HystrixRibbonServer1Application &#123;</span><br><span class="line"></span><br><span class="line">	/**</span><br><span class="line">	 *</span><br><span class="line">	 * @Bean ： 注入一个名为restTemplate的bean</span><br><span class="line">	 * @LoadBalanced ：表明这个 restTemplate 开启了负载均衡的功能</span><br><span class="line">	 *</span><br><span class="line">	 * */</span><br><span class="line">	@Bean</span><br><span class="line">	@LoadBalanced</span><br><span class="line">	RestTemplate restTemplate()&#123;return new RestTemplate();&#125;</span><br><span class="line"></span><br><span class="line">	public static void main(String[] args) &#123;</span><br><span class="line">		SpringApplication.run(HystrixRibbonServer1Application.class, args);</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="6-跨服务调用"><a href="#6-跨服务调用" class="headerlink" title="6.跨服务调用"></a>6.跨服务调用</h3><p>写一套简单的业务代码，然后调用前面创建的company-server服务提供的接口。</p>
+<h4 id="6-1-controller"><a href="#6-1-controller" class="headerlink" title="6.1 controller"></a>6.1 controller</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">@RestController</span><br><span class="line">@RequestMapping(value = &quot;hrs&quot;)</span><br><span class="line">public class HrsController &#123;</span><br><span class="line"></span><br><span class="line">  @Autowired</span><br><span class="line">  private HrsService hrsService;</span><br><span class="line"></span><br><span class="line">  @GetMapping(value = &quot;getCompany&quot;)</span><br><span class="line">  public String getCompany(String id)&#123;</span><br><span class="line">    String company = hrsService.getCompany(id);</span><br><span class="line">    System.out.println(company);</span><br><span class="line">    return company;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="6-2-service"><a href="#6-2-service" class="headerlink" title="6.2 service"></a>6.2 service</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">public interface RibbonService &#123;</span><br><span class="line"></span><br><span class="line">  String getCompany(String id);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="6-3-serviceImpl"><a href="#6-3-serviceImpl" class="headerlink" title="6.3 serviceImpl"></a>6.3 serviceImpl</h4><p>在serviceImpl实现类中，我们引入前面的RestTemplate模板类，来跨服务调用，并开启了负载均衡功能。</p>
+<p>在getCompany方法上添加@HystrixCommand注解。该注解对该方法创建了熔断器的功能，并指定了fallbackMethod熔断方法erroCompany，熔断方法直接返回了一个字符串</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">@Service</span><br><span class="line">public class HrsServiceImpl implements HrsService&#123;</span><br><span class="line"></span><br><span class="line">  //启动类中注入了此模板，并且开启了负载均衡功能</span><br><span class="line">  @Autowired</span><br><span class="line">  RestTemplate restTemplate;</span><br><span class="line"></span><br><span class="line">  //给方法添加熔断器的功能，并指定熔断方法</span><br><span class="line">  @HystrixCommand(fallbackMethod = &quot;erroCompany&quot;)</span><br><span class="line">  @Override</span><br><span class="line">  public String getCompany(String id) &#123;</span><br><span class="line">    //程序名替代服务地址，ribbon会根据服务名自动选择服务实例</span><br><span class="line">    String company = restTemplate</span><br><span class="line">        .getForObject(&quot;http://company-server/company/get?id=&quot; + id, String.class);</span><br><span class="line">    return company;</span><br><span class="line">  &#125;</span><br><span class="line">  </span><br><span class="line">  /**熔断方法*/</span><br><span class="line">  public String erroCompany(String id)&#123;</span><br><span class="line">    return &quot;服务出错，返回默认企业：&quot;+id;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="7-启动项目，测试"><a href="#7-启动项目，测试" class="headerlink" title="7.启动项目，测试"></a>7.启动项目，测试</h3><p>此时，启动项目，访问<a href="http://localhost:8017/hrs/getCompany?id=234，我们这个项目的接口会去调用前面启动的企业服务，由于企业服务启动了两台：8011，8014，那么，通过ribbon负载均衡后，会分发到两台服务上。如下：" target="_blank" rel="noopener">http://localhost:8017/hrs/getCompany?id=234，我们这个项目的接口会去调用前面启动的企业服务，由于企业服务启动了两台：8011，8014，那么，通过ribbon负载均衡后，会分发到两台服务上。如下：</a><br><img src="https://img-blog.csdnimg.cn/20181211160156742.png" alt="在这里插入图片描述"><br><img src="https://img-blog.csdnimg.cn/20181211160207398.png" alt="在这里插入图片描述"><br>当我们把8011挂掉后，此时，由于eureka更新服务列表默认时间为30s，这之间，如果请求落在8011上，那么，就会调用熔断方法，返回指定的结果，如下：<br><img src="https://img-blog.csdnimg.cn/20181211160217240.png" alt="在这里插入图片描述"></p>
+<p><img src="https://img-blog.csdnimg.cn/20181211160223627.png" alt="在这里插入图片描述"></p>
+<p>下一篇：<a href="https://blog.csdn.net/weixin_39800144/article/details/84960372" target="_blank" rel="noopener">SpringCloud教程(Finchley版本)-05：负载均衡（Feign）</a><br>完整源码参考：<a href="https://github.com/myJava4all/springcloudfinchley" target="_blank" rel="noopener">https://github.com/myJava4all/springcloudfinchley</a></p>
+
+            <div class="post-copyright">
+    <div class="content">
+        <p>最后更新： 2020年01月14日 19:07</p>
+        <p>原始链接： <a class="post-url" href="/2018/01/04/SpringCloud教程(Finchley版本)-04：断路器（Hystrix-Ribbon）/" title="SpringCloud教程(Finchley版本)-04：断路器（Hystrix-Ribbon）">https://java4all.cn/2018/01/04/SpringCloud教程(Finchley版本)-04：断路器（Hystrix-Ribbon）/</a></p>
+        <footer>
+            <a href="https://java4all.cn">
+                <img src="/images/logo3.jpg" alt="IT云清">
+                IT云清
+            </a>
+        </footer>
+    </div>
+</div>
+
+      
+        
+            
+
+        
+    </div>
+    <footer class="article-footer">
+        
+        
+<div class="post-share">
+    <a href="javascript:;" id="share-sub" class="post-share-fab">
+        <i class="fa fa-share-alt"></i>
+    </a>
+    <div class="post-share-list" id="share-list">
+        <ul class="share-icons">
+          <li>
+            <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=https://java4all.cn/2018/01/04/SpringCloud教程(Finchley版本)-04：断路器（Hystrix-Ribbon）/&title=《SpringCloud教程(Finchley版本)-04：断路器（Hystrix-Ribbon）》 — Hexo&pic=https://java4all.cn/images/电脑9.jpg" data-title="微博">
+              <i class="fa fa-weibo"></i>
+            </a>
+          </li>
+          <li>
+            <a class="weixin share-sns" id="wxFab" href="javascript:;" data-title="微信">
+              <i class="fa fa-weixin"></i>
+            </a>
+          </li>
+          <li>
+            <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=https://java4all.cn/2018/01/04/SpringCloud教程(Finchley版本)-04：断路器（Hystrix-Ribbon）/&title=《SpringCloud教程(Finchley版本)-04：断路器（Hystrix-Ribbon）》 — Hexo&source=" data-title="QQ">
+              <i class="fa fa-qq"></i>
+            </a>
+          </li>
+          <li>
+            <a class="facebook share-sns" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=https://java4all.cn/2018/01/04/SpringCloud教程(Finchley版本)-04：断路器（Hystrix-Ribbon）/" data-title="Facebook">
+              <i class="fa fa-facebook"></i>
+            </a>
+          </li>
+          <li>
+            <a class="twitter share-sns" target="_blank" href="https://twitter.com/intent/tweet?text=《SpringCloud教程(Finchley版本)-04：断路器（Hystrix-Ribbon）》 — Hexo&url=https://java4all.cn/2018/01/04/SpringCloud教程(Finchley版本)-04：断路器（Hystrix-Ribbon）/&via=https://java4all.cn" data-title="Twitter">
+              <i class="fa fa-twitter"></i>
+            </a>
+          </li>
+          <li>
+            <a class="google share-sns" target="_blank" href="https://plus.google.com/share?url=https://java4all.cn/2018/01/04/SpringCloud教程(Finchley版本)-04：断路器（Hystrix-Ribbon）/" data-title="Google+">
+              <i class="fa fa-google-plus"></i>
+            </a>
+          </li>
+        </ul>
+     </div>
+</div>
+<div class="post-modal wx-share" id="wxShare">
+    <a class="close" href="javascript:;" id="wxShare-close">×</a>
+    <p>扫一扫，分享到微信</p>
+    <img src="//api.qrserver.com/v1/create-qr-code/?data=https://java4all.cn/2018/01/04/SpringCloud教程(Finchley版本)-04：断路器（Hystrix-Ribbon）/" alt="微信分享二维码">
+</div>
+
+<div class="mask"></div>
+
+        
+        <ul class="article-footer-menu">
+            
+            
+  <li class="article-footer-tags">
+    <i class="fa fa-tags"></i>
+      
+    <a href="/tags/SpringCloud/" class="color2">SpringCloud</a>
+      
+    <a href="/tags/Ribbon/" class="color2">Ribbon</a>
+      
+    <a href="/tags/Hystrix/" class="color3">Hystrix</a>
+      
+  </li>
+
+        </ul>
+        
+    </footer>
+  </div>
+</article>
+
+
+    <aside class="post-toc-pos post-toc-top" id="post-toc">
+        <nav class="post-toc-wrap">
+            <ol class="post-toc"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#1-创建项目"><span class="post-toc-text">1.创建项目</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#2-引入依赖"><span class="post-toc-text">2.引入依赖</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#3-修改配置文件"><span class="post-toc-text">3.修改配置文件</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#4-添加启动注解"><span class="post-toc-text">4.添加启动注解</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#5-注入模板类"><span class="post-toc-text">5.注入模板类</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#6-跨服务调用"><span class="post-toc-text">6.跨服务调用</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#6-1-controller"><span class="post-toc-text">6.1 controller</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#6-2-service"><span class="post-toc-text">6.2 service</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#6-3-serviceImpl"><span class="post-toc-text">6.3 serviceImpl</span></a></li></ol></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#7-启动项目，测试"><span class="post-toc-text">7.启动项目，测试</span></a></li></ol>
+        </nav>
+    </aside>
+    
+
+<nav id="article-nav">
+  
+    <a href="/2020/01/05/Seata1.0版本整合教程/" id="article-nav-newer" class="article-nav-link-wrap">
+
+      <span class="article-nav-title">
+        <i class="fa fa-hand-o-left" aria-hidden="true"></i>
+        
+          Seata 1.0版本整合SpringCloud教程
+        
+      </span>
+    </a>
+  
+  
+    <a href="/2018/01/03/SpringCloud教程(Finchley版本)-03：负载均衡（Ribbon）/" id="article-nav-older" class="article-nav-link-wrap">
+      <span class="article-nav-title">SpringCloud教程(Finchley版本)-03：负载均衡（Ribbon）</span>
+      <i class="fa fa-hand-o-right" aria-hidden="true"></i>
+    </a>
+  
+</nav>
+
+
+
+    
+</section>
+        
+      </div>
+      <footer id="footer">
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      
+<p>
+    <span id="busuanzi_container_site_uv" style='display:none'>
+        今日访客数：<span id="busuanzi_value_site_uv"></span>
+    </span>
+    <span id="busuanzi_container_site_pv" style='display:none'>
+        今日访问量：<span id="busuanzi_value_site_pv"></span>
+    </span>
+</p>
+
+
+      <p>
+        Powered by  <a href="http://hexo.io/" target="_blank">Hexo</a>
+        Theme <a href="//github.com/wongminho/hexo-theme-miho" target="_blank">MiHo</a>
+      &copy; 2020 IT云清<br>
+      </p>
+    </div>
+  </div>
+</footer>
+    <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+<script src="//cdn.bootcss.com/jquery/3.2.1/jquery.min.js"></script>
+<script>
+  var mihoConfig = {
+      root: "https://java4all.cn",
+      animate: true,
+      isHome: false,
+      share: true,
+      reward: 0
+  }
+</script>
+<div class="sidebar">
+    <div id="sidebar-search" title="Search">
+        <i class="fa fa-search"></i>
+    </div>
+    <div id="sidebar-category" title="Categories">
+        <i class="fa fa-book"></i>
+    </div>
+    <div id="sidebar-tag" title="Tags">
+        <i class="fa fa-tags"></i>
+    </div>
+    <div id="sidebar-top">
+        <span class="sidebar-top-icon"><i class="fa fa-angle-up"></i></span>
+    </div>
+</div>
+<div class="sidebar-menu-box" id="sidebar-menu-box">
+    <div class="sidebar-menu-box-container">
+        <div id="sidebar-menu-box-categories">
+            <a class="category-link" href="/categories/Seata/">Seata</a><a class="category-link" href="/categories/SpringCloud/">SpringCloud</a><a class="category-link" href="/categories/管理/">管理</a>
+        </div>
+        <div id="sidebar-menu-box-tags">
+            <a href="/tags/Eureka/" style="font-size: 10px;">Eureka</a> <a href="/tags/Hystrix/" style="font-size: 10px;">Hystrix</a> <a href="/tags/Java/" style="font-size: 15px;">Java</a> <a href="/tags/Ribbon/" style="font-size: 15px;">Ribbon</a> <a href="/tags/Seata/" style="font-size: 10px;">Seata</a> <a href="/tags/SpringCloud/" style="font-size: 20px;">SpringCloud</a> <a href="/tags/code-review/" style="font-size: 10px;">code review</a> <a href="/tags/管理/" style="font-size: 10px;">管理</a>
+        </div>
+    </div>
+    <a href="javascript:;" class="sidebar-menu-box-close">&times;</a>
+</div>
+<div class="mobile-header-menu-nav" id="mobile-header-menu-nav">
+    <div class="mobile-header-menu-container">
+        <span class="title">Menus</span>
+        <ul class="mobile-header-menu-navbar">
+            
+            <li>
+                <a  href="/">
+                    <i class="fa fa-home"></i><span>Home</span>
+                </a>
+            </li>
+            
+            <li>
+                <a  href="/archives">
+                    <i class="fa fa-archive"></i><span>Archives</span>
+                </a>
+            </li>
+            
+            <li>
+                <a  href="/about">
+                    <i class="fa fa-user"></i><span>About</span>
+                </a>
+            </li>
+            
+        </ul>
+    </div>
+    <div class="mobile-header-tag-container">
+        <span class="title">Tags</span>
+        <div id="mobile-header-container-tags">
+            <a href="/tags/Eureka/" style="font-size: 10px;">Eureka</a> <a href="/tags/Hystrix/" style="font-size: 10px;">Hystrix</a> <a href="/tags/Java/" style="font-size: 15px;">Java</a> <a href="/tags/Ribbon/" style="font-size: 15px;">Ribbon</a> <a href="/tags/Seata/" style="font-size: 10px;">Seata</a> <a href="/tags/SpringCloud/" style="font-size: 20px;">SpringCloud</a> <a href="/tags/code-review/" style="font-size: 10px;">code review</a> <a href="/tags/管理/" style="font-size: 10px;">管理</a>
+        </div>
+    </div>
+</div>
+<div class="search-wrap">
+    <span class="search-close">&times;</span>
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="back">
+            <i class="icon icon-lg icon-chevron-left"></i>
+        </a>
+        <input class="search-field" placeholder="Search..." id="keywords">
+        <a id="search-submit" href="javascript:;">
+            <i class="fa fa-search"></i>
+        </a>
+    <div class="search-container" id="search-container">
+        <ul class="search-result" id="search-result">
+        </ul>
+    </div>
+</div>
+
+<div id="search-tpl">
+    <li class="search-result-item">
+        <a href="{url}" class="search-item-li">
+            <span class="search-item-li-title" title="{title}">{title}</span>
+        </a>
+    </li>
+</div>
+<script src="/js/search.js"></script>
+<script src="/js/main.js"></script>
+
+
+  <script src="//cdn.bootcss.com/particles.js/2.0.0/particles.min.js"></script>
+  <div id="particles"></div>
+  <script src="/js/particles.js"></script>
+
+
+
+
+
+
+
+  <link rel="stylesheet" href="//cdn.bootcss.com/animate.css/3.5.0/animate.min.css">
+  <script src="//cdn.bootcss.com/scrollReveal.js/3.0.5/scrollreveal.js"></script>
+  <script src="/js/animate.js"></script>
+
+
+  <script src="/js/pop-img.js"></script>
+  <script>
+     $(".article-entry p img").popImg();
+  </script>
+
+  </div>
+</body>
+</html>
