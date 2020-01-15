@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html>
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="utf-8">
+  
+  <title>Redission分布式锁加锁原理源码解析 | Hexo</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  
+    <meta name="keywords" content="IT云清的博客">
+  
+  <meta name="description" content="追踪一下redission加锁的实现源码，并详细介绍核心加锁代码lua脚本的执行原理和过程。 1.获取锁这里是我们自己实现，调用redission的方法，获取锁，然后加锁。lock.lock(expireTime, timeUnit)是关键，我们追进去。 1234567891011121314/** * 获取锁，如果没有主动调用unlock解锁，expireTime后会自动释放 * @param">
+<meta name="keywords" content="Redission,分布式锁">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Redission分布式锁加锁原理源码解析">
+<meta property="og:url" content="https://java4all.cn/2018/01/09/Redission分布式锁加锁原理源码解析/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="追踪一下redission加锁的实现源码，并详细介绍核心加锁代码lua脚本的执行原理和过程。 1.获取锁这里是我们自己实现，调用redission的方法，获取锁，然后加锁。lock.lock(expireTime, timeUnit)是关键，我们追进去。 1234567891011121314/** * 获取锁，如果没有主动调用unlock解锁，expireTime后会自动释放 * @param">
+<meta property="og:locale" content="en">
+<meta property="og:updated_time" content="2020-01-15T07:39:13.722Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Redission分布式锁加锁原理源码解析">
+<meta name="twitter:description" content="追踪一下redission加锁的实现源码，并详细介绍核心加锁代码lua脚本的执行原理和过程。 1.获取锁这里是我们自己实现，调用redission的方法，获取锁，然后加锁。lock.lock(expireTime, timeUnit)是关键，我们追进去。 1234567891011121314/** * 获取锁，如果没有主动调用unlock解锁，expireTime后会自动释放 * @param">
+  
+  
+    <link rel="icon" href="/my.icon">
+  
+  <link href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+  <link rel="stylesheet" href="/css/style.css">
+  <script src="/js/pace.min.js"></script>
+  
+
+  
+  
+
+</head>
+</html>
+<body>
+  <div id="container">
+      <header id="header">
+    <div id="banner"></div>
+    <div id="header-outer">
+        <div id="header-menu" class="header-menu-pos animated">
+            <div class="header-menu-container">
+                <a href="/" class="left">
+                    <span class="site-title">IT云清</span>
+                </a>
+                <nav id="header-menu-nav" class="right">
+                    
+                    <a  href="/">
+                        <i class="fa fa-home"></i>
+                        <span>Home</span>
+                    </a>
+                    
+                    <a  href="/archives">
+                        <i class="fa fa-archive"></i>
+                        <span>Archives</span>
+                    </a>
+                    
+                    <a  href="/about">
+                        <i class="fa fa-user"></i>
+                        <span>About</span>
+                    </a>
+                    
+                </nav>
+                <a class="mobile-header-menu-button">
+                    <i class="fa fa-bars"></i>
+                </a>
+            </div>
+        </div>
+        <div id="header-row">
+            <div id="logo">
+                <a href="/">
+                    <img src="/images/logo3.jpg" alt="logo">
+                </a>
+            </div>
+            <div class="header-info">
+                <div id="header-title">
+                    
+                    <h2>
+                        IT云清
+                    </h2>
+                    
+                </div>
+                <div id="header-description">
+                    
+                    <h3>
+                        专注于JAVA
+                    </h3>
+                    
+                </div>
+            </div>
+            <nav class="header-nav">
+                <div class="social">
+                    
+                        <a title="IT云清" target="_blank" href="//java4all.cn">
+                            <i class="fa fa-home fa-2x"></i></a>
+                    
+                        <a title="Github" target="_blank" href="//github.com/lightClouds917">
+                            <i class="fa fa-github fa-2x"></i></a>
+                    
+                        <a title="CSDN" target="_blank" href="//it4all.blog.csdn.net">
+                            <i class="fa fa-twitter fa-2x"></i></a>
+                    
+                        <a title="Wechat" target="_blank" href="//java4all.cn/images/wechat_code_me.png">
+                            <i class="fa fa-weixin fa-2x"></i></a>
+                    
+                </div>
+            </nav>
+        </div>
+    </div>
+</header>
+      <div class="outer">
+        <section id="main" class="body-wrap"><article id="post-Redission分布式锁加锁原理源码解析" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 class="post-title" itemprop="name">
+      Redission分布式锁加锁原理源码解析
+    </h1>
+    <div class="post-title-bar">
+      <ul>
+          
+              <li>
+                  <i class="fa fa-book"></i>
+                  
+                      <a href="/categories/Redission/">Redission</a>
+                  
+              </li>
+          
+        <li>
+          <i class="fa fa-calendar"></i>  2018-01-09
+        </li>
+        <li>
+          <i class="fa fa-eye"></i>
+          <span id="busuanzi_value_page_pv"></span>
+        </li>
+      </ul>
+    </div>
+  
+
+          
+      </header>
+    
+    <div class="article-entry post-content" itemprop="articleBody">
+      
+            
+            <p>追踪一下redission加锁的实现源码，并详细介绍核心加锁代码lua脚本的执行原理和过程。</p>
+<h3 id="1-获取锁"><a href="#1-获取锁" class="headerlink" title="1.获取锁"></a>1.获取锁</h3><p>这里是我们自己实现，调用redission的方法，获取锁，然后加锁。<code>lock.lock(expireTime, timeUnit)</code>是关键，我们追进去。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">/**</span><br><span class="line"> * 获取锁，如果没有主动调用unlock解锁，expireTime后会自动释放</span><br><span class="line"> * @param lockKey</span><br><span class="line"> * @param expireTime 如果没有调用unlock解锁，expireTime 后自动释放</span><br><span class="line"> * @param timeUnit 时间单位</span><br><span class="line"> * @return</span><br><span class="line"> */</span><br><span class="line">public RLock lock(String lockKey,Integer expireTime,TimeUnit timeUnit)&#123;</span><br><span class="line">    RLock lock = redisson.getLock(lockKey);</span><br><span class="line">    lock.lock(expireTime, timeUnit);</span><br><span class="line">    logger.info(&quot;【Redisson lock】success to acquire lock for [ &quot;+lockKey+&quot; ],expire time:&quot;+expireTime+timeUnit);</span><br><span class="line">    return lock;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>进入 <code>lock.lock(expireTime, timeUnit);</code></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">/**</span><br><span class="line"> * Acquires the lock.</span><br><span class="line"> *</span><br><span class="line"> * &lt;p&gt;If the lock is not available then the current thread becomes</span><br><span class="line"> * disabled for thread scheduling purposes and lies dormant until the</span><br><span class="line"> * lock has been acquired.</span><br><span class="line"> *</span><br><span class="line"> * If the lock is acquired, it is held until &lt;code&gt;unlock&lt;/code&gt; is invoked,</span><br><span class="line"> * or until leaseTime milliseconds have passed</span><br><span class="line"> * since the lock was granted - whichever comes first.</span><br><span class="line"> *</span><br><span class="line"> * @param leaseTime the maximum time to hold the lock after granting it,</span><br><span class="line"> *        before automatically releasing it if it hasn&apos;t already been released by invoking &lt;code&gt;unlock&lt;/code&gt;.</span><br><span class="line"> *        If leaseTime is -1, hold the lock until explicitly unlocked.</span><br><span class="line"> * @param unit the time unit of the &#123;@code leaseTime&#125; argument</span><br><span class="line"> *</span><br><span class="line"> */</span><br><span class="line">void lock(long leaseTime, TimeUnit unit);</span><br></pre></td></tr></table></figure>
+
+<p>进入实现方法</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">@Override</span><br><span class="line">public void lock(long leaseTime, TimeUnit unit) &#123;</span><br><span class="line">    try &#123;</span><br><span class="line">        lockInterruptibly(leaseTime, unit);</span><br><span class="line">    &#125; catch (InterruptedException e) &#123;</span><br><span class="line">        Thread.currentThread().interrupt();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>进入 <code>lockInterruptibly(leaseTime, unit);</code></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line">    @Override</span><br><span class="line">    public void lockInterruptibly(long leaseTime, TimeUnit unit) throws InterruptedException &#123;</span><br><span class="line">        long threadId = Thread.currentThread().getId();</span><br><span class="line">        Long ttl = tryAcquire(leaseTime, unit, threadId);</span><br><span class="line">        // lock acquired</span><br><span class="line">        if (ttl == null) &#123;</span><br><span class="line">            return;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        RFuture&lt;RedissonLockEntry&gt; future = subscribe(threadId);</span><br><span class="line">        commandExecutor.syncSubscription(future);</span><br><span class="line"></span><br><span class="line">        try &#123;</span><br><span class="line">            while (true) &#123;</span><br><span class="line">                ttl = tryAcquire(leaseTime, unit, threadId);</span><br><span class="line">                // lock acquired</span><br><span class="line">                if (ttl == null) &#123;</span><br><span class="line">                    break;</span><br><span class="line">                &#125;</span><br><span class="line"></span><br><span class="line">                // waiting for message</span><br><span class="line">                if (ttl &gt;= 0) &#123;</span><br><span class="line">                    getEntry(threadId).getLatch().tryAcquire(ttl, TimeUnit.MILLISECONDS);</span><br><span class="line">                &#125; else &#123;</span><br><span class="line">                    getEntry(threadId).getLatch().acquire();</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125; finally &#123;</span><br><span class="line">            unsubscribe(future, threadId);</span><br><span class="line">        &#125;</span><br><span class="line">//        get(lockAsync(leaseTime, unit));</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+
+<p>进入<code>Long ttl = tryAcquire(leaseTime, unit, threadId);</code></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">private Long tryAcquire(long leaseTime, TimeUnit unit, long threadId) &#123;</span><br><span class="line">    return get(tryAcquireAsync(leaseTime, unit, threadId));</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>进入</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">private &lt;T&gt; RFuture&lt;Long&gt; tryAcquireAsync(long leaseTime, TimeUnit unit, final long threadId) &#123;</span><br><span class="line">    if (leaseTime != -1) &#123;</span><br><span class="line">        return tryLockInnerAsync(leaseTime, unit, threadId, RedisCommands.EVAL_LONG);</span><br><span class="line">    &#125;</span><br><span class="line">    RFuture&lt;Long&gt; ttlRemainingFuture = tryLockInnerAsync(commandExecutor.getConnectionManager().getCfg().getLockWatchdogTimeout(), TimeUnit.MILLISECONDS, threadId, RedisCommands.EVAL_LONG);</span><br><span class="line">    ttlRemainingFuture.addListener(new FutureListener&lt;Long&gt;() &#123;</span><br><span class="line">        @Override</span><br><span class="line">        public void operationComplete(Future&lt;Long&gt; future) throws Exception &#123;</span><br><span class="line">            if (!future.isSuccess()) &#123;</span><br><span class="line">                return;</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            Long ttlRemaining = future.getNow();</span><br><span class="line">            // lock acquired</span><br><span class="line">            if (ttlRemaining == null) &#123;</span><br><span class="line">                scheduleExpirationRenewal(threadId);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;);</span><br><span class="line">    return ttlRemainingFuture;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>进入核心<code>tryLockInnerAsync(leaseTime, unit, threadId, RedisCommands.EVAL_LONG)</code></p>
+<p>这里是加锁的核心方法：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">&lt;T&gt; RFuture&lt;T&gt; tryLockInnerAsync(long leaseTime, TimeUnit unit, long threadId, RedisStrictCommand&lt;T&gt; command) &#123;</span><br><span class="line">	//时间转化为毫秒值</span><br><span class="line">    internalLockLeaseTime = unit.toMillis(leaseTime);</span><br><span class="line"></span><br><span class="line">    return commandExecutor.evalWriteAsync(getName(), LongCodec.INSTANCE, command,</span><br><span class="line">              &quot;if (redis.call(&apos;exists&apos;, KEYS[1]) == 0) then &quot; +</span><br><span class="line">                  &quot;redis.call(&apos;hset&apos;, KEYS[1], ARGV[2], 1); &quot; +</span><br><span class="line">                  &quot;redis.call(&apos;pexpire&apos;, KEYS[1], ARGV[1]); &quot; +</span><br><span class="line">                  &quot;return nil; &quot; +</span><br><span class="line">              &quot;end; &quot; +</span><br><span class="line">              &quot;if (redis.call(&apos;hexists&apos;, KEYS[1], ARGV[2]) == 1) then &quot; +</span><br><span class="line">                  &quot;redis.call(&apos;hincrby&apos;, KEYS[1], ARGV[2], 1); &quot; +</span><br><span class="line">                  &quot;redis.call(&apos;pexpire&apos;, KEYS[1], ARGV[1]); &quot; +</span><br><span class="line">                  &quot;return nil; &quot; +</span><br><span class="line">              &quot;end; &quot; +</span><br><span class="line">              &quot;return redis.call(&apos;pttl&apos;, KEYS[1]);&quot;,</span><br><span class="line">                Collections.&lt;Object&gt;singletonList(getName()), internalLockLeaseTime, getLockName(threadId));</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这里最终的是执行了一段具有原子性的lua脚本，由CommandAsynExecutor执行；<br>这个锁最终持久化到redis时，使用的是hash类型的key field value;<br>这里注意下最后一行几个参数的对应关系：<br>getName()), internalLockLeaseTime, getLockName(threadId)<br>分别是key[1],ARGV[1],ARGV[2];</p>
+<ul>
+<li>getName()是逻辑锁名称，例如：我们发起锁的一方传递的锁名称 productId1672822；</li>
+<li>internalLockLeaseTime是毫秒单位的锁过期时间；</li>
+<li>getLockName则是锁对应的线程级别的名称，因为支持相同线程可重入，不同线程不可重入，所以这里的锁的生成方式是：UUID+”:”threadId</li>
+</ul>
+<p>Lua脚本中的执行分为以下三步：</p>
+<ul>
+<li><p>1:exists检查redis中是否存在锁名称；如果不存在，则获取成功；同时把逻辑锁名称KEYS[1]，线程级别的锁名称[ARGV[2]，value=1,设置到redis。并设置逻辑锁名称的过期时间ARGV[2]，返回；</p>
+</li>
+<li><p>2:如果检查到存在KEYS[1],[ARGV[2],则说明获取成功，此时会自增对应的value值，记录重入次数；并更新锁的过期时间</p>
+</li>
+<li><p>3：key不存，直接返回key的剩余过期时间（-2）</p>
+</li>
+</ul>
+
+            <div class="post-copyright">
+    <div class="content">
+        <p>最后更新： 2020年01月15日 15:39</p>
+        <p>原始链接： <a class="post-url" href="/2018/01/09/Redission分布式锁加锁原理源码解析/" title="Redission分布式锁加锁原理源码解析">https://java4all.cn/2018/01/09/Redission分布式锁加锁原理源码解析/</a></p>
+        <footer>
+            <a href="https://java4all.cn">
+                <img src="/images/logo3.jpg" alt="IT云清">
+                IT云清
+            </a>
+        </footer>
+    </div>
+</div>
+
+      
+        
+            
+
+        
+    </div>
+    <footer class="article-footer">
+        
+        
+<div class="post-share">
+    <a href="javascript:;" id="share-sub" class="post-share-fab">
+        <i class="fa fa-share-alt"></i>
+    </a>
+    <div class="post-share-list" id="share-list">
+        <ul class="share-icons">
+          <li>
+            <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=https://java4all.cn/2018/01/09/Redission分布式锁加锁原理源码解析/&title=《Redission分布式锁加锁原理源码解析》 — Hexo&pic=https://java4all.cn/images/电脑18.jpg" data-title="微博">
+              <i class="fa fa-weibo"></i>
+            </a>
+          </li>
+          <li>
+            <a class="weixin share-sns" id="wxFab" href="javascript:;" data-title="微信">
+              <i class="fa fa-weixin"></i>
+            </a>
+          </li>
+          <li>
+            <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=https://java4all.cn/2018/01/09/Redission分布式锁加锁原理源码解析/&title=《Redission分布式锁加锁原理源码解析》 — Hexo&source=" data-title="QQ">
+              <i class="fa fa-qq"></i>
+            </a>
+          </li>
+          <li>
+            <a class="facebook share-sns" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=https://java4all.cn/2018/01/09/Redission分布式锁加锁原理源码解析/" data-title="Facebook">
+              <i class="fa fa-facebook"></i>
+            </a>
+          </li>
+          <li>
+            <a class="twitter share-sns" target="_blank" href="https://twitter.com/intent/tweet?text=《Redission分布式锁加锁原理源码解析》 — Hexo&url=https://java4all.cn/2018/01/09/Redission分布式锁加锁原理源码解析/&via=https://java4all.cn" data-title="Twitter">
+              <i class="fa fa-twitter"></i>
+            </a>
+          </li>
+          <li>
+            <a class="google share-sns" target="_blank" href="https://plus.google.com/share?url=https://java4all.cn/2018/01/09/Redission分布式锁加锁原理源码解析/" data-title="Google+">
+              <i class="fa fa-google-plus"></i>
+            </a>
+          </li>
+        </ul>
+     </div>
+</div>
+<div class="post-modal wx-share" id="wxShare">
+    <a class="close" href="javascript:;" id="wxShare-close">×</a>
+    <p>扫一扫，分享到微信</p>
+    <img src="//api.qrserver.com/v1/create-qr-code/?data=https://java4all.cn/2018/01/09/Redission分布式锁加锁原理源码解析/" alt="微信分享二维码">
+</div>
+
+<div class="mask"></div>
+
+        
+        <ul class="article-footer-menu">
+            
+            
+  <li class="article-footer-tags">
+    <i class="fa fa-tags"></i>
+      
+    <a href="/tags/Redission/" class="color5">Redission</a>
+      
+    <a href="/tags/分布式锁/" class="color5">分布式锁</a>
+      
+  </li>
+
+        </ul>
+        
+    </footer>
+  </div>
+</article>
+
+
+    <aside class="post-toc-pos post-toc-top" id="post-toc">
+        <nav class="post-toc-wrap">
+            <ol class="post-toc"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#1-获取锁"><span class="post-toc-text">1.获取锁</span></a></li></ol>
+        </nav>
+    </aside>
+    
+
+<nav id="article-nav">
+  
+    <a href="/2019/10/01/Seata中事务隔离性与锁分析/" id="article-nav-newer" class="article-nav-link-wrap">
+
+      <span class="article-nav-title">
+        <i class="fa fa-hand-o-left" aria-hidden="true"></i>
+        
+          Seata中事务隔离性与锁分析
+        
+      </span>
+    </a>
+  
+  
+    <a href="/2018/01/08/SpringCloud教程(Finchley版本)-08：eureka集群搭建/" id="article-nav-older" class="article-nav-link-wrap">
+      <span class="article-nav-title">SpringCloud教程(Finchley版本)-08：eureka集群搭建</span>
+      <i class="fa fa-hand-o-right" aria-hidden="true"></i>
+    </a>
+  
+</nav>
+
+
+
+    
+</section>
+        
+      </div>
+      <footer id="footer">
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      
+<p>
+    <span id="busuanzi_container_site_uv" style='display:none'>
+        今日访客数：<span id="busuanzi_value_site_uv"></span>
+    </span>
+    <span id="busuanzi_container_site_pv" style='display:none'>
+        今日访问量：<span id="busuanzi_value_site_pv"></span>
+    </span>
+</p>
+
+
+      <p>
+        Powered by  <a href="http://hexo.io/" target="_blank">Hexo</a>
+        Theme <a href="//github.com/wongminho/hexo-theme-miho" target="_blank">MiHo</a>
+      &copy; 2020 IT云清<br>
+      </p>
+    </div>
+  </div>
+</footer>
+    <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+<script src="//cdn.bootcss.com/jquery/3.2.1/jquery.min.js"></script>
+<script>
+  var mihoConfig = {
+      root: "https://java4all.cn",
+      animate: true,
+      isHome: false,
+      share: true,
+      reward: 0
+  }
+</script>
+<div class="sidebar">
+    <div id="sidebar-search" title="Search">
+        <i class="fa fa-search"></i>
+    </div>
+    <div id="sidebar-category" title="Categories">
+        <i class="fa fa-book"></i>
+    </div>
+    <div id="sidebar-tag" title="Tags">
+        <i class="fa fa-tags"></i>
+    </div>
+    <div id="sidebar-top">
+        <span class="sidebar-top-icon"><i class="fa fa-angle-up"></i></span>
+    </div>
+</div>
+<div class="sidebar-menu-box" id="sidebar-menu-box">
+    <div class="sidebar-menu-box-container">
+        <div id="sidebar-menu-box-categories">
+            <a class="category-link" href="/categories/Redission/">Redission</a><a class="category-link" href="/categories/Seata/">Seata</a><a class="category-link" href="/categories/SpringCloud/">SpringCloud</a><a class="category-link" href="/categories/管理/">管理</a>
+        </div>
+        <div id="sidebar-menu-box-tags">
+            <a href="/tags/Eureka/" style="font-size: 10px;">Eureka</a> <a href="/tags/Feign/" style="font-size: 15px;">Feign</a> <a href="/tags/Hystrix/" style="font-size: 15px;">Hystrix</a> <a href="/tags/Java/" style="font-size: 15px;">Java</a> <a href="/tags/Redission/" style="font-size: 10px;">Redission</a> <a href="/tags/Ribbon/" style="font-size: 15px;">Ribbon</a> <a href="/tags/Seata/" style="font-size: 15px;">Seata</a> <a href="/tags/SpringCloud/" style="font-size: 20px;">SpringCloud</a> <a href="/tags/Zuul/" style="font-size: 10px;">Zuul</a> <a href="/tags/code-review/" style="font-size: 10px;">code review</a> <a href="/tags/eureka/" style="font-size: 10px;">eureka</a> <a href="/tags/分布式事务/" style="font-size: 10px;">分布式事务</a> <a href="/tags/分布式锁/" style="font-size: 10px;">分布式锁</a> <a href="/tags/管理/" style="font-size: 10px;">管理</a>
+        </div>
+    </div>
+    <a href="javascript:;" class="sidebar-menu-box-close">&times;</a>
+</div>
+<div class="mobile-header-menu-nav" id="mobile-header-menu-nav">
+    <div class="mobile-header-menu-container">
+        <span class="title">Menus</span>
+        <ul class="mobile-header-menu-navbar">
+            
+            <li>
+                <a  href="/">
+                    <i class="fa fa-home"></i><span>Home</span>
+                </a>
+            </li>
+            
+            <li>
+                <a  href="/archives">
+                    <i class="fa fa-archive"></i><span>Archives</span>
+                </a>
+            </li>
+            
+            <li>
+                <a  href="/about">
+                    <i class="fa fa-user"></i><span>About</span>
+                </a>
+            </li>
+            
+        </ul>
+    </div>
+    <div class="mobile-header-tag-container">
+        <span class="title">Tags</span>
+        <div id="mobile-header-container-tags">
+            <a href="/tags/Eureka/" style="font-size: 10px;">Eureka</a> <a href="/tags/Feign/" style="font-size: 15px;">Feign</a> <a href="/tags/Hystrix/" style="font-size: 15px;">Hystrix</a> <a href="/tags/Java/" style="font-size: 15px;">Java</a> <a href="/tags/Redission/" style="font-size: 10px;">Redission</a> <a href="/tags/Ribbon/" style="font-size: 15px;">Ribbon</a> <a href="/tags/Seata/" style="font-size: 15px;">Seata</a> <a href="/tags/SpringCloud/" style="font-size: 20px;">SpringCloud</a> <a href="/tags/Zuul/" style="font-size: 10px;">Zuul</a> <a href="/tags/code-review/" style="font-size: 10px;">code review</a> <a href="/tags/eureka/" style="font-size: 10px;">eureka</a> <a href="/tags/分布式事务/" style="font-size: 10px;">分布式事务</a> <a href="/tags/分布式锁/" style="font-size: 10px;">分布式锁</a> <a href="/tags/管理/" style="font-size: 10px;">管理</a>
+        </div>
+    </div>
+</div>
+<div class="search-wrap">
+    <span class="search-close">&times;</span>
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="back">
+            <i class="icon icon-lg icon-chevron-left"></i>
+        </a>
+        <input class="search-field" placeholder="Search..." id="keywords">
+        <a id="search-submit" href="javascript:;">
+            <i class="fa fa-search"></i>
+        </a>
+    <div class="search-container" id="search-container">
+        <ul class="search-result" id="search-result">
+        </ul>
+    </div>
+</div>
+
+<div id="search-tpl">
+    <li class="search-result-item">
+        <a href="{url}" class="search-item-li">
+            <span class="search-item-li-title" title="{title}">{title}</span>
+        </a>
+    </li>
+</div>
+<script src="/js/search.js"></script>
+<script src="/js/main.js"></script>
+
+
+  <script src="//cdn.bootcss.com/particles.js/2.0.0/particles.min.js"></script>
+  <div id="particles"></div>
+  <script src="/js/particles.js"></script>
+
+
+
+
+
+
+
+  <link rel="stylesheet" href="//cdn.bootcss.com/animate.css/3.5.0/animate.min.css">
+  <script src="//cdn.bootcss.com/scrollReveal.js/3.0.5/scrollreveal.js"></script>
+  <script src="/js/animate.js"></script>
+
+
+  <script src="/js/pop-img.js"></script>
+  <script>
+     $(".article-entry p img").popImg();
+  </script>
+
+  </div>
+</body>
+</html>
