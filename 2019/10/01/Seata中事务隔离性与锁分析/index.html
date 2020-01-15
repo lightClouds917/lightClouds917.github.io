@@ -8,21 +8,21 @@
   
     <meta name="keywords" content="IT云清的博客">
   
-  <meta name="description" content="1.官方说法官方的文章中，有这么一段话：  全局事务的隔离性是建立在分支事务的本地隔离级别基础之上的。在数据库本地隔离级别 读已提交 或以上的前提下，Fescar 设计了由事务协调器维护的 全局写排他锁，来保证事务间的 写隔离，将全局事务默认定义在 读未提交 的隔离级别上。我们对隔离级别的共识是：微服务场景产生的分布式事务，绝大部分应用在 读已提交 的隔离级别下工作是没有问题的。而实际上，这当中又">
+  <meta name="description" content="1.官方说法官方的文章中，有这么一段话：  全局事务的隔离性是建立在分支事务的本地隔离级别基础之上的。在数据库本地隔离级别 读已提交 或以上的前提下，seata 设计了由事务协调器维护的 全局写排他锁，来保证事务间的 写隔离，将全局事务默认定义在 读未提交 的隔离级别上。我们对隔离级别的共识是：微服务场景产生的分布式事务，绝大部分应用在 读已提交 的隔离级别下工作是没有问题的。而实际上，这当中又有">
 <meta name="keywords" content="Seata,分布式事务">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Seata中事务隔离性与锁分析">
 <meta property="og:url" content="https://java4all.cn/2019/10/01/Seata中事务隔离性与锁分析/index.html">
 <meta property="og:site_name" content="Hexo">
-<meta property="og:description" content="1.官方说法官方的文章中，有这么一段话：  全局事务的隔离性是建立在分支事务的本地隔离级别基础之上的。在数据库本地隔离级别 读已提交 或以上的前提下，Fescar 设计了由事务协调器维护的 全局写排他锁，来保证事务间的 写隔离，将全局事务默认定义在 读未提交 的隔离级别上。我们对隔离级别的共识是：微服务场景产生的分布式事务，绝大部分应用在 读已提交 的隔离级别下工作是没有问题的。而实际上，这当中又">
+<meta property="og:description" content="1.官方说法官方的文章中，有这么一段话：  全局事务的隔离性是建立在分支事务的本地隔离级别基础之上的。在数据库本地隔离级别 读已提交 或以上的前提下，seata 设计了由事务协调器维护的 全局写排他锁，来保证事务间的 写隔离，将全局事务默认定义在 读未提交 的隔离级别上。我们对隔离级别的共识是：微服务场景产生的分布式事务，绝大部分应用在 读已提交 的隔离级别下工作是没有问题的。而实际上，这当中又有">
 <meta property="og:locale" content="en">
 <meta property="og:image" content="https://img-blog.csdnimg.cn/20191024194929630.png">
 <meta property="og:image" content="https://img-blog.csdnimg.cn/20191024194643628.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9pdDRhbGwuYmxvZy5jc2RuLm5ldA==,size_16,color_FFFFFF,t_70">
 <meta property="og:image" content="https://img-blog.csdnimg.cn/20191024202835758.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9pdDRhbGwuYmxvZy5jc2RuLm5ldA==,size_16,color_FFFFFF,t_70">
-<meta property="og:updated_time" content="2020-01-15T07:27:31.416Z">
+<meta property="og:updated_time" content="2020-01-15T07:30:39.868Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Seata中事务隔离性与锁分析">
-<meta name="twitter:description" content="1.官方说法官方的文章中，有这么一段话：  全局事务的隔离性是建立在分支事务的本地隔离级别基础之上的。在数据库本地隔离级别 读已提交 或以上的前提下，Fescar 设计了由事务协调器维护的 全局写排他锁，来保证事务间的 写隔离，将全局事务默认定义在 读未提交 的隔离级别上。我们对隔离级别的共识是：微服务场景产生的分布式事务，绝大部分应用在 读已提交 的隔离级别下工作是没有问题的。而实际上，这当中又">
+<meta name="twitter:description" content="1.官方说法官方的文章中，有这么一段话：  全局事务的隔离性是建立在分支事务的本地隔离级别基础之上的。在数据库本地隔离级别 读已提交 或以上的前提下，seata 设计了由事务协调器维护的 全局写排他锁，来保证事务间的 写隔离，将全局事务默认定义在 读未提交 的隔离级别上。我们对隔离级别的共识是：微服务场景产生的分布式事务，绝大部分应用在 读已提交 的隔离级别下工作是没有问题的。而实际上，这当中又有">
 <meta name="twitter:image" content="https://img-blog.csdnimg.cn/20191024194929630.png">
   
   
@@ -152,7 +152,7 @@
             
             <h3 id="1-官方说法"><a href="#1-官方说法" class="headerlink" title="1.官方说法"></a>1.官方说法</h3><p>官方的文章中，有这么一段话：</p>
 <blockquote>
-<p>全局事务的隔离性是建立在分支事务的本地隔离级别基础之上的。<br>在数据库本地隔离级别 读已提交 或以上的前提下，Fescar 设计了由事务协调器维护的 全局写排他锁，来保证事务间的 写隔离，将全局事务默认定义在 读未提交 的隔离级别上。<br>我们对隔离级别的共识是：微服务场景产生的分布式事务，绝大部分应用在 读已提交 的隔离级别下工作是没有问题的。而实际上，这当中又有绝大多数的应用场景，实际上工作在 读未提交 的隔离级别下同样没有问题。<br>在极端场景下，应用如果需要达到全局的 读已提交，Fescar 也提供了相应的机制来达到目的。默认，Fescar 是工作在 读未提交 的隔离级别下，保证绝大多数场景的高效性。</p>
+<p>全局事务的隔离性是建立在分支事务的本地隔离级别基础之上的。<br>在数据库本地隔离级别 读已提交 或以上的前提下，seata 设计了由事务协调器维护的 全局写排他锁，来保证事务间的 写隔离，将全局事务默认定义在 读未提交 的隔离级别上。<br>我们对隔离级别的共识是：微服务场景产生的分布式事务，绝大部分应用在 读已提交 的隔离级别下工作是没有问题的。而实际上，这当中又有绝大多数的应用场景，实际上工作在 读未提交 的隔离级别下同样没有问题。<br>在极端场景下，应用如果需要达到全局的 读已提交，seata 也提供了相应的机制来达到目的。默认，seata 是工作在 读未提交 的隔离级别下，保证绝大多数场景的高效性。</p>
 </blockquote>
 <h3 id="2-一个案例"><a href="#2-一个案例" class="headerlink" title="2.一个案例"></a>2.一个案例</h3><p>看一下下方这个官方场景案例：<br>1.有一张表：<img src="https://img-blog.csdnimg.cn/20191024194929630.png" alt="在这里插入图片描述"></p>
 <p>2.有两个全局事务分别是tx1,tx2；</p>
@@ -215,7 +215,7 @@
 
             <div class="post-copyright">
     <div class="content">
-        <p>最后更新： 2020年01月15日 15:27</p>
+        <p>最后更新： 2020年01月15日 15:30</p>
         <p>原始链接： <a class="post-url" href="/2019/10/01/Seata中事务隔离性与锁分析/" title="Seata中事务隔离性与锁分析">https://java4all.cn/2019/10/01/Seata中事务隔离性与锁分析/</a></p>
         <footer>
             <a href="https://java4all.cn">
