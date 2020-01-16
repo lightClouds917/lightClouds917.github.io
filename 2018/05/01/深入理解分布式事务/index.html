@@ -1,0 +1,703 @@
+<!DOCTYPE html>
+<html>
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="utf-8">
+  
+  <title>深入理解分布式事务 | Hexo</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  
+    <meta name="keywords" content="IT云清的博客">
+  
+  <meta name="description" content="目录：在阅读本文之前，请先看下目录，了解下本文主要讲了哪些内容。 @[toc]本文已经近 12000 字，太长的文章可能让人失去耐心，建议分 2 次看，考虑到这一点，有些地方的讲解假设读者有一定的基础，未做特别详细的讲解。对分布式事务感兴趣的同学，欢迎添加作者微信（w1186355422，请注明一下来源，谢谢），一起讨论交流，由于水平有限，文章内容如有什么问题，欢迎各位大佬批评指导，感谢支持。 1">
+<meta name="keywords" content="分布式事务,2pc,3pc,tcc">
+<meta property="og:type" content="article">
+<meta property="og:title" content="深入理解分布式事务">
+<meta property="og:url" content="https://java4all.cn/2018/05/01/深入理解分布式事务/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="目录：在阅读本文之前，请先看下目录，了解下本文主要讲了哪些内容。 @[toc]本文已经近 12000 字，太长的文章可能让人失去耐心，建议分 2 次看，考虑到这一点，有些地方的讲解假设读者有一定的基础，未做特别详细的讲解。对分布式事务感兴趣的同学，欢迎添加作者微信（w1186355422，请注明一下来源，谢谢），一起讨论交流，由于水平有限，文章内容如有什么问题，欢迎各位大佬批评指导，感谢支持。 1">
+<meta property="og:locale" content="en">
+<meta property="og:image" content="https://images.gitbook.cn/06de8730-bab3-11e9-9352-d1ed4128f5ef">
+<meta property="og:image" content="https://images.gitbook.cn/0e003e00-bab3-11e9-998d-c193ee9e3011">
+<meta property="og:image" content="https://images.gitbook.cn/36693170-bc2b-11e9-9252-81826702a838">
+<meta property="og:image" content="https://images.gitbook.cn/061a98a0-bc2c-11e9-9252-81826702a838">
+<meta property="og:image" content="https://images.gitbook.cn/ec05c340-bc35-11e9-9cd5-ab2d3df62aed">
+<meta property="og:image" content="https://images.gitbook.cn/f2bfb790-bc35-11e9-9cd5-ab2d3df62aed">
+<meta property="og:image" content="https://images.gitbook.cn/0b48b140-bc36-11e9-9252-81826702a838">
+<meta property="og:image" content="https://images.gitbook.cn/10d63380-bc36-11e9-9252-81826702a838">
+<meta property="og:image" content="https://images.gitbook.cn/24ce3360-bc36-11e9-9252-81826702a838">
+<meta property="og:image" content="https://images.gitbook.cn/2b0f0010-bc36-11e9-9cd5-ab2d3df62aed">
+<meta property="og:image" content="https://images.gitbook.cn/33da6f40-bc36-11e9-9252-81826702a838">
+<meta property="og:image" content="https://images.gitbook.cn/3a3e0630-bc36-11e9-9252-81826702a838">
+<meta property="og:updated_time" content="2020-01-16T02:28:27.364Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="深入理解分布式事务">
+<meta name="twitter:description" content="目录：在阅读本文之前，请先看下目录，了解下本文主要讲了哪些内容。 @[toc]本文已经近 12000 字，太长的文章可能让人失去耐心，建议分 2 次看，考虑到这一点，有些地方的讲解假设读者有一定的基础，未做特别详细的讲解。对分布式事务感兴趣的同学，欢迎添加作者微信（w1186355422，请注明一下来源，谢谢），一起讨论交流，由于水平有限，文章内容如有什么问题，欢迎各位大佬批评指导，感谢支持。 1">
+<meta name="twitter:image" content="https://images.gitbook.cn/06de8730-bab3-11e9-9352-d1ed4128f5ef">
+  
+  
+    <link rel="icon" href="/my.icon">
+  
+  <link href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+  <link rel="stylesheet" href="/css/style.css">
+  <script src="/js/pace.min.js"></script>
+  
+
+  
+  
+
+</head>
+</html>
+<body>
+  <div id="container">
+      <header id="header">
+    <div id="banner"></div>
+    <div id="header-outer">
+        <div id="header-menu" class="header-menu-pos animated">
+            <div class="header-menu-container">
+                <a href="/" class="left">
+                    <span class="site-title">IT云清</span>
+                </a>
+                <nav id="header-menu-nav" class="right">
+                    
+                    <a  href="/">
+                        <i class="fa fa-home"></i>
+                        <span>Home</span>
+                    </a>
+                    
+                    <a  href="/archives">
+                        <i class="fa fa-archive"></i>
+                        <span>Archives</span>
+                    </a>
+                    
+                    <a  href="/about">
+                        <i class="fa fa-user"></i>
+                        <span>About</span>
+                    </a>
+                    
+                </nav>
+                <a class="mobile-header-menu-button">
+                    <i class="fa fa-bars"></i>
+                </a>
+            </div>
+        </div>
+        <div id="header-row">
+            <div id="logo">
+                <a href="/">
+                    <img src="/images/logo3.jpg" alt="logo">
+                </a>
+            </div>
+            <div class="header-info">
+                <div id="header-title">
+                    
+                    <h2>
+                        IT云清
+                    </h2>
+                    
+                </div>
+                <div id="header-description">
+                    
+                    <h3>
+                        专注于JAVA
+                    </h3>
+                    
+                </div>
+            </div>
+            <nav class="header-nav">
+                <div class="social">
+                    
+                        <a title="IT云清" target="_blank" href="//java4all.cn">
+                            <i class="fa fa-home fa-2x"></i></a>
+                    
+                        <a title="Github" target="_blank" href="//github.com/lightClouds917">
+                            <i class="fa fa-github fa-2x"></i></a>
+                    
+                        <a title="CSDN" target="_blank" href="//it4all.blog.csdn.net">
+                            <i class="fa fa-twitter fa-2x"></i></a>
+                    
+                        <a title="Wechat" target="_blank" href="//java4all.cn/images/wechat_code_me.png">
+                            <i class="fa fa-weixin fa-2x"></i></a>
+                    
+                </div>
+            </nav>
+        </div>
+    </div>
+</header>
+      <div class="outer">
+        <section id="main" class="body-wrap"><article id="post-深入理解分布式事务" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 class="post-title" itemprop="name">
+      深入理解分布式事务
+    </h1>
+    <div class="post-title-bar">
+      <ul>
+          
+              <li>
+                  <i class="fa fa-book"></i>
+                  
+                      <a href="/categories/分布式事务/">分布式事务</a>
+                  
+              </li>
+          
+        <li>
+          <i class="fa fa-calendar"></i>  2018-05-01
+        </li>
+        <li>
+          <i class="fa fa-eye"></i>
+          <span id="busuanzi_value_page_pv"></span>
+        </li>
+      </ul>
+    </div>
+  
+
+          
+      </header>
+    
+    <div class="article-entry post-content" itemprop="articleBody">
+      
+            
+            <p>目录：在阅读本文之前，请先看下目录，了解下本文主要讲了哪些内容。</p>
+<p>@[toc]<br>本文已经近 12000 字，太长的文章可能让人失去耐心，建议分 2 次看，考虑到这一点，有些地方的讲解假设读者有一定的基础，未做特别详细的讲解。对分布式事务感兴趣的同学，欢迎添加作者微信（w1186355422，请注明一下来源，谢谢），一起讨论交流，由于水平有限，文章内容如有什么问题，欢迎各位大佬批评指导，感谢支持。</p>
+<h3 id="1-实际场景遇到的问题"><a href="#1-实际场景遇到的问题" class="headerlink" title="1. 实际场景遇到的问题"></a>1. 实际场景遇到的问题</h3><h4 id="1-1-单体架构事务场景"><a href="#1-1-单体架构事务场景" class="headerlink" title="1.1 单体架构事务场景"></a>1.1 单体架构事务场景</h4><p>事务场景中经典的转账案例，相信大家都看过，这里不再赘述，这里再抽象一个我实际工作中遇到的场景：</p>
+<blockquote>
+<p>两年前，2017 年的时候，我所在的公司有多个项目都是单体架构，所有的模块的都在一起，不同的功能逻辑写在不同的包下，连接的是同一个 MySQL 数据库，项目打包后扔在一个 Tomcat 下跑。</p>
+</blockquote>
+<p>这里我简单抽象下这个系统的实际场景作用：</p>
+<ul>
+<li>用户：IT 云清（简称云清）</li>
+<li>公司：CSDN 有限公司（简称 CSDN）</li>
+</ul>
+<p>由于云清在 CSDN 是博客专家，积累了一定的信誉，所以，CSDN 给云清了 10 万的授信额度，这 10 万是云清的借款额度上限，现在云清没钱了，要从 CSDN 借钱，这个借款操作，可以抽象概括为以下几个步骤：</p>
+<ol>
+<li>云清发起借款，调用借款模块的借款接口</li>
+<li>借款同时，在授信表里，减少云清的授信额度</li>
+<li>借款同时，在资金表里，增加云清的账户余额</li>
+<li>借款同时，在日志表里，增加一条流水记录</li>
+</ol>
+<blockquote>
+<p>实际场景中，此借款的步骤远比上述操作复杂，包括审核流程、还款计划等，这里为了简化模型，只抽取上述几个操作。 </p>
+</blockquote>
+<p><strong>成功情况：</strong> </p>
+<p>上面的场景中，在一切都 OK 的情况下，这个借款操作，等于就是在一个接口的实现方法中，操作了不同的表，然后添加 Spring 的 @Transaction 本地事务。在操作每个表都成功时，如下图所示，整个操作成功，数据一致性得到了保障。 </p>
+<p>这一套流程走完，云清的授信减少了，云清的账户余额增加了，这一笔操作的流水也记录了，如图一： </p>
+<p><img src="https://images.gitbook.cn/06de8730-bab3-11e9-9352-d1ed4128f5ef" alt="在这里插入图片描述"> </p>
+<p><strong>失败情况：</strong> </p>
+<p>如果其中一个表操作失败，比如借款额度大于剩余授信了，比如拿不到数据库连接了，或者数据库挂了，导致对资金表的操作失败了，会怎么样呢？ </p>
+<p><img src="https://images.gitbook.cn/0e003e00-bab3-11e9-998d-c193ee9e3011" alt="在这里插入图片描述"> </p>
+<p>由于有 Spring 本地事务的控制，当其中一张表操作失败时，整个操作都会回滚。这样，整个借款就会失败，由于资金表操作失败，减少授信额度和增加流水记录，这几个步骤都会回滚。这样，最终的数据是正确的，一致的，并没有出现问题。</p>
+<p>在单体服务中，一个请求的整个周期，从请求到响应结果，都是在一台服务器上，一个 JVM 中，本地事务就可以保证一组数据操作的一致性。</p>
+<h4 id="1-2-微服务架构事务场景"><a href="#1-2-微服务架构事务场景" class="headerlink" title="1.2 微服务架构事务场景"></a>1.2 微服务架构事务场景</h4><p>由于微服务越来越火，很多企业很多项目，都逐渐转向微服务架构，我现在的项目中，一个项目拆分成了 7 个微服务，我们这里还是只抽取部分微服务讲解，每个微服务部署在独立的服务器，有自己独立的数据库，如图二： </p>
+<p><img src="https://images.gitbook.cn/36693170-bc2b-11e9-9252-81826702a838" alt="在这里插入图片描述"> </p>
+<p>这个借款操作，可以抽象概括为以下几个步骤：</p>
+<ol>
+<li>用户发起借款，调用借款服务的借款接口</li>
+<li>借款同时，调用授信服务 减少授信额度</li>
+<li>借款同时，调用资金服务 增加账户余额</li>
+<li>借款同时，调用日志服务 增加流水记录</li>
+<li>……</li>
+</ol>
+<blockquote>
+<p>实际场景中，此借款的步骤远比上述操作复杂，包括审核流程、还款计划等，这里为了简化模型，只抽取上述几个操作。</p>
+</blockquote>
+<p>由于每个服务都是单独部署的，在理想状态下，上述的操作，可以顺利得以执行，每个服务中的每个操作都没有问题，那么最终，数据还是一致的。可是在分布式环境下，由于网络的不可靠、服务器的不可靠、多服务间的跨服务调用延迟、多服务各自数据库的问题、中间件问题等，会出现各种各样的问题。</p>
+<p>我们假设，云清发起借款时，资金服务的数据库挂掉了，那么就变成了如下场景，如图三： </p>
+<p><img src="https://images.gitbook.cn/061a98a0-bc2c-11e9-9252-81826702a838" alt="在这里插入图片描述"> </p>
+<p>这个链路成为了如下的样子：</p>
+<ol>
+<li>用户发起借款，调用借款服务的借款接口</li>
+<li>借款同时，调用授信服务 减少授信额度</li>
+<li>借款同时，调用资金服务 增加账户余额 x</li>
+<li>借款同时，调用日志服务 增加流水记录</li>
+</ol>
+<p>这时，由于是在多个服务中，本地的 Transaction 已经无法应对这个情况了，现在系列操作导致了上述的情况，云清的授信额度减少了，流水也记录了，但是云清账户上却没有收到钱，那 IT 云清内心肯定是 mmp 的，是要把客服电话打爆掉的。</p>
+<p>这种问题，如何应对呢？这就涉及到了这篇文章的主题：<strong>分布式事务</strong>。</p>
+<h3 id="2-分布式事务"><a href="#2-分布式事务" class="headerlink" title="2. 分布式事务"></a>2. 分布式事务</h3><p>根据上述的实际情况，我们可以总结出分布式事务的概念：分布式事务，是指会涉及到操作多个数据库的事务（可以对比本地事务操作一库多表），解决分布式事务问题的目的就是为了保证分布式系统中的数据一致性。</p>
+<p>通俗一点来讲，就是一次大的操作由不同的小操作组成，这些小的操作分布在不同的服务器上，且属于不同的应用，调用的不同的数据库，分布式事务需要保证这些小操作要么全部成功，要么全部失败。</p>
+<p>由于在分布式系统中，各个节点在物理上是相互独立的，通过网络协调和沟通，由于存在 Spring 事务机制，各个节点在本地的事务是可以得到保证的，但是，各独立节点互相之间，是无法准确知道其他节点的事务执行情况的。所以也就不知道本次事务到底应该 Commit 还是 Rollback。所以，咋整呢？</p>
+<p>作为老司机，我们可以想到一个方法：</p>
+<blockquote>
+<p>引入一个“协调者”的组件来统一调度所有分布式节点的执行，这个协调者，作为第三方，他获取所有节点的执行情况，然后判断决定出一个统一的结果：全部提交或全部回滚 。</p>
+</blockquote>
+<p>这里对部分刚接触的同学解释下 2 个概念： </p>
+<ul>
+<li><strong>本地事务：</strong>通常把一个数据库内部的事务处理，如对多个表的操作，作为本地事务看待。</li>
+<li><strong>全局事务：</strong>是指分布式事务处理环境中，多个数据库可能需要共同完成一个工作，这个工作即是一个全局事务。例如，一个事务中可能更新几个不同的数据库，对数据库的操作发生在系统的各处，但必须全部被提交或回滚。此时一个数据库对自己内部所做操作的提交不仅依赖本身操作是否成功，还要依赖与全局事务相关的其它数据库的操作是否成功，如果任一数据库的任一操作失败，则参与此事务的所有数据库所做的所有操作都必须回滚。</li>
+</ul>
+<h3 id="3-2PC"><a href="#3-2PC" class="headerlink" title="3. 2PC"></a>3. 2PC</h3><h4 id="3-1-理论基础"><a href="#3-1-理论基础" class="headerlink" title="3.1 理论基础"></a>3.1 理论基础</h4><p>二阶段提交（Two-phaseCommit）是一种中心化的事务处理提交协议。</p>
+<p>如上面所分析的，在分布式系统中，每个节点虽然可以知道自己的操作是成功或者失败，但是却无法知道其他节点操作的成功或失败。当一个事务包含多个节点时，为了保持事务的一致性，需要引入第三方协调者，这个协调者来统一掌控所有节点（称作参与者）的操作结果，并最终指示这些节点是否要把操作结果进行真正的提交。</p>
+<p>二阶段提交的算法思路：</p>
+<p>事务发起方调用协调者，协调者与各参与者之间互动，参与者将操作成败通知协调者，再由协调者根据所有参与者的反馈情况决定各参与者是要提交操作还是中止操作。</p>
+<p>两个阶段是指：</p>
+<ul>
+<li>第一阶段：准备阶段（投票阶段 Vote Phase）</li>
+<li>第二阶段：提交阶段（执行阶段 Commit Phase）</li>
+</ul>
+<h4 id="3-2-PC-实现"><a href="#3-2-PC-实现" class="headerlink" title="3.2 PC 实现"></a>3.2 PC 实现</h4><h5 id="3-2-1-准备阶段"><a href="#3-2-1-准备阶段" class="headerlink" title="3.2.1 准备阶段"></a><strong>3.2.1 准备阶段</strong></h5><p>事务发起方调用协调者，事务协调者（事务管理器）给每个参与者（资源管理器）发送 Prepare 消息，每个参与者要么直接返回失败（如数据库挂掉，网络不通），要么在本地执行事务，并写本地的 Undo 日志，<strong>但不提交</strong>。</p>
+<p>这个准备阶段又可以细分为三个步骤：</p>
+<ol>
+<li>协调者节点向所有参与者节点发起 Vote Request（询问是否可以执行提交操作），并开始等待各参与者节点的响应。</li>
+<li>参与者节点执行询问发起为止的所有事务操作，并将 Undo 信息和 Redo 信息写入日志。（注意理解这个点：若成功这里其实每个参与者已经执行了事务操作，只是执行完事务操作，并没有进行 Commit 或者 Rollback）。</li>
+<li>各参与者节点响应协调者发起的询问。如果参与者节点的事务操作实际执行成功，则它返回一个“同意”消息；如果参与者节点的事务操作实际执行失败，则它返回一个“中止”消息。</li>
+</ol>
+<p>准备阶段如下： </p>
+<p><img src="https://images.gitbook.cn/ec05c340-bc35-11e9-9cd5-ab2d3df62aed" alt="在这里插入图片描述"> </p>
+<p><img src="https://images.gitbook.cn/f2bfb790-bc35-11e9-9cd5-ab2d3df62aed" alt="在这里插入图片描述"></p>
+<h5 id="3-2-2-提交阶段"><a href="#3-2-2-提交阶段" class="headerlink" title="3.2.2 提交阶段"></a><strong>3.2.2 提交阶段</strong></h5><p>如果协调者收到了参与者的中止消息或者等待超时也未收到回复，直接给每个参与者发送回滚（Rollback）消息；否则，发送提交（Commit）消息。</p>
+<p>参与者根据协调者的指令执行提交或者回滚操作，释放所有事务处理过程中使用的锁资源。（注意：必须在最后阶段释放锁资源）</p>
+<p>在提交阶段，又分为 2 种情况。</p>
+<p>当协调者节点从所有参与者节点获取的都是 “同意” 时：</p>
+<ul>
+<li>协调者节点向所有参与者节点发出“正式提交（Commit）”的请求</li>
+<li>参与者节点正式完成 Commit 操作，并释放在整个事务期间内占用的资源</li>
+<li>参与者节点向协调者节点发送“完成”消息</li>
+<li>协调者节点收到所有参与者节点反馈的“完成”消息后，完成事务</li>
+</ul>
+<p><img src="https://images.gitbook.cn/0b48b140-bc36-11e9-9252-81826702a838" alt="在这里插入图片描述"><br><img src="https://images.gitbook.cn/10d63380-bc36-11e9-9252-81826702a838" alt="在这里插入图片描述"> </p>
+<p>当协调者节点在第一阶段中收到的反馈有“终止”，或者等待超时后协调者节点没有获取到所有参与者节点的“同意”时：</p>
+<ul>
+<li>协调者节点向所有参与者节点发出“回滚操作（Rollback）”的请求</li>
+<li>参与者节点利用之前写入的 Undo 信息执行回滚，并释放在整个事务期间内占用的资源</li>
+<li>参与者节点向协调者节点发送“回滚完成”消息</li>
+<li>协调者节点受到所有参与者节点反馈的“回滚完成”消息后，取消事务</li>
+</ul>
+<p>不管最后结果如何，第二阶段都会结束当前事务，释放资源。</p>
+<p>当第一阶段的反馈结果不全是“同意”，执行流程如下：</p>
+<p><img src="https://images.gitbook.cn/24ce3360-bc36-11e9-9252-81826702a838" alt="在这里插入图片描述"> </p>
+<p><img src="https://images.gitbook.cn/2b0f0010-bc36-11e9-9cd5-ab2d3df62aed" alt="在这里插入图片描述"> </p>
+<p><img src="https://images.gitbook.cn/33da6f40-bc36-11e9-9252-81826702a838" alt="在这里插入图片描述"> </p>
+<p><img src="https://images.gitbook.cn/3a3e0630-bc36-11e9-9252-81826702a838" alt="在这里插入图片描述"></p>
+<h4 id="3-3-2PC-优缺点"><a href="#3-3-2PC-优缺点" class="headerlink" title="3.3 2PC 优缺点"></a>3.3 2PC 优缺点</h4><h5 id="3-3-1-同步阻塞问题"><a href="#3-3-1-同步阻塞问题" class="headerlink" title="3.3.1 同步阻塞问题"></a><strong>3.3.1 同步阻塞问题</strong></h5><p>执行过程中，所有参与节点都是事务阻塞型的，第一阶段和第二阶段都是阻塞的。各节点都阻塞着等待其他节点的执行情况，当参与者占有公共资源时，其他第三方节点访问公共资源不得不处于阻塞状态，效率低下（这一点，阿里巴巴的 Seata，采用了一种更激进的做法，第一阶段就把事务提交掉，并释放全局锁，如果第二阶段要回滚，才会把全局锁持有至第二阶段结束）。</p>
+<h5 id="3-3-2-单点故障"><a href="#3-3-2-单点故障" class="headerlink" title="3.3.2 单点故障"></a><strong>3.3.2 单点故障</strong></h5><p>由于协调者的重要性，一旦协调者发生故障。参与者会一直阻塞下去。尤其在第二阶段，协调者发生故障，那么所有的参与者还都处于锁定事务资源的状态中，而无法继续完成事务操作。</p>
+<h5 id="3-3-3-数据不一致"><a href="#3-3-3-数据不一致" class="headerlink" title="3.3.3 数据不一致"></a><strong>3.3.3 数据不一致</strong></h5><p>在二阶段提交的阶段二中，当协调者向参与者发送 Commit 请求之后，发生了局部网络异常或者在发送 Commit 请求过程中协调者发生了故障，这会导致只有一部分参与者接受到了 Commit 请求。而在这部分参与者接到 Commit 请求之后就会执行 Commit 操作，但是其他部分未接到 Commit 请求的机器则无法执行事务提交。于是整个分布式系统便出现了数据不一致性的现象。</p>
+<h5 id="3-3-4-不确定性"><a href="#3-3-4-不确定性" class="headerlink" title="3.3.4 不确定性"></a><strong>3.3.4 不确定性</strong></h5><p>协调者再发出 Commit 消息之后宕机，而唯一接收到这条消息的参与者同时也宕机了。那么即使协调者通过选举协议产生了新的协调者，这条事务的状态也是不确定的，没人知道事务是否被已经提交。</p>
+<p>由于二阶段提交存在着上述的一些缺陷，所以，研究者们在二阶段提交的基础上做了改进，提出了三阶段提交。</p>
+<h3 id="4-3PC"><a href="#4-3PC" class="headerlink" title="4. 3PC"></a>4. 3PC</h3><h4 id="4-1-理论基础"><a href="#4-1-理论基础" class="headerlink" title="4.1 理论基础"></a>4.1 理论基础</h4><p>三阶段提交（Three-phase commit），也叫三阶段提交协议（Three-phase commit protocol），可以看做是二阶段提交（2PC）的改进版本。</p>
+<p>与两阶段提交不同的是，三阶段提交有两个改动点：</p>
+<ul>
+<li>引入一种超时机制。（解决协调者单点故障的问题）</li>
+<li>在第一阶段和第二阶段中插入一个准备阶段。保证了在最后提交阶段之前各参与节点的状态是一致的。</li>
+</ul>
+<p>阶段提交有 CanCommit、PreCommit、DoCommit 三个阶段。</p>
+<p>在第一阶段，只是询问所有参与者是否可以执行事务操作，并不在本阶段执行事务操作。当协调者收到所有的参与者都返回 YES 时，在第二阶段才执行事务操作，然后在第三阶段执行 Commit 或者 Rollback。</p>
+<h4 id="4-2-3PC-实现"><a href="#4-2-3PC-实现" class="headerlink" title="4.2 3PC 实现"></a>4.2 3PC 实现</h4><h5 id="4-2-1-CanCommit-阶段"><a href="#4-2-1-CanCommit-阶段" class="headerlink" title="4.2.1 CanCommit 阶段"></a><strong>4.2.1 CanCommit 阶段</strong></h5><p>3PC 的 CanCommit 阶段其实和 2PC 的准备阶段很像。协调者向参与者发送 Can Commit 请求，参与者如果可以提交就返回 Yes 响应，否则返回 No 响应。</p>
+<p>这个阶段又可以细分为 2 个步骤：</p>
+<ul>
+<li>事务询问：协调者向参与者发送 CanCommit 请求。询问是否可以执行事务操作，并不在本地执行事务操作。然后开始等待参与者的响应。</li>
+<li>响应反馈：参与者接到 CanCommit 请求之后，正常情况下，如果其自身认为可以顺利执行事务，则返回 Yes 响应，并进入预备状态，否则反馈 No。</li>
+</ul>
+<h5 id="4-2-2-PreCommit-阶段"><a href="#4-2-2-PreCommit-阶段" class="headerlink" title="4.2.2 PreCommit 阶段"></a><strong>4.2.2 PreCommit 阶段</strong></h5><p>协调者根据参与者的反应情况来决定是否可以进行事务的 PreCommit 操作。根据响应情况，有以下两种可能：</p>
+<p>假如协调者从所有的参与者获得的反馈都是 Yes 响应，那么就会执行事务的预执行：</p>
+<ul>
+<li>发送预提交请求： 协调者向参与者发送 PreCommit 请求，并进入 Prepared 阶段。</li>
+<li>事务预提交：参与者接收到 PreCommit 请求后，会执行事务操作，并将 undo 和 redo 信息记录到事务日志中。（此时没有 Commit）</li>
+<li>响应反馈： 如果参与者成功的执行了事务操作，则返回 ACK 响应，同时开始等待最终指令。</li>
+</ul>
+<p>假如有任何一个参与者向协调者发送了 No 响应，或者等待超时之后，协调者都没有接到参与者的响应，那么就执行事务的中断。</p>
+<ul>
+<li>发送中断请求： 协调者向所有参与者发送 abort 请求。</li>
+<li>中断事务： 参与者收到来自协调者的 abort 请求之后（或超时之后，仍未收到协调者的请求），执行事务的中断。</li>
+</ul>
+<h5 id="4-3-3-DoCommit-阶段"><a href="#4-3-3-DoCommit-阶段" class="headerlink" title="4.3.3 DoCommit 阶段"></a><strong>4.3.3 DoCommit 阶段</strong></h5><p>该阶段进行真正的事务提交，也可以分为以下两种情况。</p>
+<p><strong>执行提交</strong></p>
+<p>1. 发送提交请求</p>
+<p>协调接收到参与者发送的 ACK 响应，那么他将从预提交状态进入到提交状态。并向所有参与者发送 DoCommit 请求。</p>
+<p>2. 事务提交</p>
+<p>参与者接收到 DoCommit 请求之后，执行正式的事务提交。并在完成事务提交之后释放所有事务资源。</p>
+<p>3. 响应反馈</p>
+<p>事务提交完之后，向协调者发送 ACK 响应。</p>
+<p>4. 完成事务</p>
+<p>协调者接收到所有参与者的 ACK 响应之后，完成事务。</p>
+<p><strong>中断事务</strong></p>
+<p>协调者没有接收到参与者发送的 ACK 响应（可能是接受者发送的不是 ACK 响应，也可能响应超时），那么就会执行中断事务。</p>
+<p>1. 发送中断请求</p>
+<p>协调者向所有参与者发送 abort 请求。</p>
+<p>2. 事务回滚</p>
+<p>参与者接收到 abort 请求之后，利用其在阶段二记录的 undo 信息来执行事务的回滚操作，并在完成回滚之后释放所有的事务资源。</p>
+<p>3. 反馈结果</p>
+<p>参与者完成事务回滚之后，向协调者发送 ACK 消息。</p>
+<p>4. 中断事务</p>
+<p>协调者接收到参与者反馈的 ACK 消息之后，执行事务的中断。</p>
+<p>在 DoCommit 阶段，如果参与者无法及时接收到来自协调者的 DoCommit 或者 rebort 请求时，会在等待超时之后，继续进行事务的提交。</p>
+<p>这里引用一篇文章提到的说法：</p>
+<blockquote>
+<p>当进入第三阶段时，说明参与者在第二阶段已经收到了 PreCommit 请求，那么协调者产生 PreCommit 请求的前提条件是他在第二阶段开始之前，收到所有参与者的 CanCommit 响应都是 Yes。一旦参与者收到了 PreCommit，意味他知道大家其实都同意修改了，所以，一句话概括就是，当进入第三阶段时，由于网络超时等原因，虽然参与者没有收到 Commit 或者 abort 响应，但是他有理由相信：成功提交的几率很大。</p>
+</blockquote>
+<h4 id="4-3-3PC-优缺点"><a href="#4-3-3PC-优缺点" class="headerlink" title="4.3 3PC 优缺点"></a>4.3 3PC 优缺点</h4><p>相对于 2PC，3PC 主要解决的协调者单点故障问题，并减少阻塞，因为一旦参与者无法及时收到来自协调者的信息之后，他会默认执行 Commit，而不会想 2PC 一样一直持有事务资源并处于阻塞状态。</p>
+<p>但是这种机制也会导致数据一致性问题，因为，由于网络原因，协调者发送的 abort 响应没有及时被参与者接收到，那么参与者在等待超时之后执行了 Commit 操作。这样就和其他接到 abort 命令并执行回滚的参与者之间存在数据不一致的情况。</p>
+<h3 id="5-TCC"><a href="#5-TCC" class="headerlink" title="5. TCC"></a>5. TCC</h3><h4 id="5-1-理论基础"><a href="#5-1-理论基础" class="headerlink" title="5.1 理论基础"></a>5.1 理论基础</h4><p>前面我们讲了 2PC 协议，3PC 协议，我们可以暂时认为 2PC 协议，3PC 协议他们是传统的事务处理机制，这里我们讲一讲 TCC（Try-Confirm-Cancel） 事务机制，相对于传统事务机制（X/Open XA Two-Phase-Commit），TCC 的特别之处在于它不依赖资源管理器（RM）对 XA 的支持，而是通过对业务逻辑（由业务系统提供的）的调度来实现分布式事务的管理。</p>
+<p>在一个业务系统中，我们有 A 服务，提供一个操作 Op，他对外提供服务时，由于网络原因，服务状态，数据库状态等原因，这个 Op 操作，是不能确定百分百可以成功的，怎么办呢？</p>
+<p>我们可以用这样一种思路：对这个 Op 的操作，我们第一次调用时，只是当作一个临时操作（Try），我们保留后续取消这个操作的权力，如果全局事务认为它该 Commit，那我们就对这个临时性操作做一个确定性的提交（Confirm），如果全局事务认为它该 Rollback，那我们就撤销这个操作（Cancel）。</p>
+<p>在 TCC 事务机制中，每一个操作，都会有一个与之对应的确认和撤销操作，这个操作最终都会被确认或取消。因此，针对一个具体的业务服务，TCC 事务机制需要业务系统提供三段业务逻辑：</p>
+<ol>
+<li>初步操作 Try</li>
+<li>确认操作 Confirm</li>
+<li>取消操作 Cancel</li>
+</ol>
+<h4 id="5-2-TCC-实现"><a href="#5-2-TCC-实现" class="headerlink" title="5.2 TCC 实现"></a>5.2 TCC 实现</h4><p><strong>初步操作（Try）</strong></p>
+<p>TCC 事务机制中的业务逻辑（Try），并不是一个完整的操作，很多情况下，他只是去检查预留确认操作所需要的资源，或者去冻结资源，它和后续的确认操作一起才能真正构成一个完整的业务逻辑。</p>
+<blockquote>
+<p>我们可以认为：传统事务机制的业务逻辑 = TCC事务机制的 Try+TCC 事务机制的 Confirm</p>
+</blockquote>
+<p>TCC 事务机制以初步操作（Try）为中心，即使失败，仍然有取消操作（Cancel）可以将其不良影响进行回撤。</p>
+<p><strong>确认操作（Confirm）</strong></p>
+<p>确认操作（Confirm）是对初步操作（Try）的一个补充。当 TCC 事务管理器决定 Commit 全局事务时，就会逐个执行初步操作（Try）指定的确认操作（Confirm），将初步操作（Try）未完成的事项最终完成。</p>
+<p><strong>取消操作（Cancel）</strong></p>
+<p>取消操作（Cancel）是对初步操作（Try）的一个回撤。当 TCC 事务管理器决定 Rollback 全局事务时，就会逐个执行初步操作（Try）指定的取消操作（Cancel），将初步操作（Try）已完成的操作全部撤回。</p>
+<h4 id="5-3-落地"><a href="#5-3-落地" class="headerlink" title="5.3 落地"></a>5.3 落地</h4><p>如果我们想在项目中落地 TCC 分布式事务，首先需要选择某种 TCC 框架整合到项目中，在传统的（有别于 TCC 模式）业务逻辑实现中，我们写业务，一个接口一般有一个实现（这里不要抠词语考虑多实现，我们只是为了更直观地展示用 TCC 和不用 TCC 两种模式下的显著区别），现在要改造为 3 个：Try、Confirm、Cancel：</p>
+<ul>
+<li>先是服务调用链路依次执行 Try 逻辑。</li>
+<li>如果都正常的话，TCC 分布式事务框架推进执行 Confirm 逻辑，完成整个事务。</li>
+<li>如果某个服务的 Try 逻辑有问题，TCC 分布式事务框架感知到之后就会推进执行各个服务的 Cancel 逻辑，撤销之前 Try 阶段执行的各种操作。</li>
+</ul>
+<p>在业务操作调用时，先来 Try 一下，不要把业务逻辑完成，先试试看，看各个服务能不能基本正常运转，能不能先冻结需要的资源。</p>
+<p>如果 Try 都 OK，也就是说，底层的数据库、Redis、Elasticsearch、MQ 都是可以写入数据的，并且你保留好了需要使用的一些资源（比如冻结了一部分库存）。</p>
+<p>接着，再执行各个服务的 Confirm 逻辑，基本上 Confirm 就可以很大概率保证一个分布式事务的完成了。</p>
+<p>那如果 Try 阶段某个服务就失败了，比如说底层的数据库挂了，或者 Redis 挂了，等等。此时就自动执行各个服务的 Cancel 逻辑，把之前的 Try 逻辑都回滚。保证要么一起成功，要么一起失败。</p>
+<p>如果有一些意外的情况发生了，比如说某个服务突然挂了，然后再次重启，TCC 分布式事务框架是如何保证之前没执行完的分布式事务继续执行的呢？</p>
+<p>如果看过 byteTCC、Seata 等框架的源码，会发现事务框架都是有日志模块的，主要用来记录一些分布式事务的活动日志的，可以在日志文件里记录，也可以在数据库里记录，来保存分布式事务运行的各个阶段的状态和相关数据，如果由于其他原因导致了服务出现问题，这时候日志就会起作用了。</p>
+<h4 id="5-4-TCC-优缺点"><a href="#5-4-TCC-优缺点" class="headerlink" title="5.4 TCC 优缺点"></a>5.4 TCC 优缺点</h4><ol>
+<li>实现 TCC 的业务成本，一个逻辑得写 3 套，分别对应 Try、Confirm、Cancel，而且针对不同失败情况，CC 的逻辑可能还不一样</li>
+<li>Confirm 和 Cancel 操作的执行成本</li>
+<li>记录日志的成本和开销</li>
+<li>复杂业务，TCC 的 CC 难以处理，难以实现</li>
+<li>如果框架不考虑幂等，事务内 CC 实现需要考虑幂等</li>
+</ol>
+<h3 id="6-分布式事务解决方案"><a href="#6-分布式事务解决方案" class="headerlink" title="6. 分布式事务解决方案"></a>6. 分布式事务解决方案</h3><p>排名不分先后，在前面的不一定是强烈推荐的。</p>
+<p><strong>1. LCN</strong></p>
+<ul>
+<li>官网：<a href="https://www.txlcn.org/zh-cn/" target="_blank" rel="noopener">https://www.txlcn.org/zh-cn/</a></li>
+<li>文档：<a href="https://www.txlcn.org/zh-cn/docs/preface.html" target="_blank" rel="noopener">https://www.txlcn.org/zh-cn/docs/preface.html</a></li>
+<li>GitHub：<a href="https://github.com/codingapi/tx-lcn" target="_blank" rel="noopener">https://github.com/codingapi/tx-lcn</a></li>
+</ul>
+<p>TX-LCN 是一款事务协调性框架，框架其本身并不操作事务，而是基于对事务的协调从而达到事务一致性的效果。目前已经到 5.0.2 版本，5.0 以后框架兼容了 LCN、TCC、TXC 三种事务模式，对使用者比较简单，加注解即可实现全局事务控制，但是会有一些问题，比如集群问题，调用成环场景。如果业务简单，并发不大，还是可以使用的。</p>
+<p>LCN 含义：</p>
+<ul>
+<li>锁定事务单元（Lock）</li>
+<li>确认事务模块状态（Confirm）</li>
+<li>通知事务（Notify）</li>
+</ul>
+<p><strong>2. ByteTCC</strong></p>
+<ul>
+<li>文档：<a href="https://github.com/liuyangming/ByteTCC/wiki" target="_blank" rel="noopener">https://github.com/liuyangming/ByteTCC/wiki</a></li>
+<li>GitHub：<a href="https://github.com/liuyangming/ByteTCC" target="_blank" rel="noopener">https://github.com/liuyangming/ByteTCC</a></li>
+</ul>
+<p>整合教程</p>
+<p>0.4.x 版本：</p>
+<ul>
+<li><a href="https://blog.csdn.net/weixin_39800144/article/details/87697138" target="_blank" rel="noopener">https://blog.csdn.net/weixin_39800144/article/details/87697138</a> </li>
+</ul>
+<p>0.5.x 版本：</p>
+<ul>
+<li><a href="https://blog.csdn.net/weixin_39800144/article/details/87345339" target="_blank" rel="noopener">https://blog.csdn.net/weixin_39800144/article/details/87345339</a> </li>
+<li><a href="https://blog.csdn.net/weixin_39800144/article/details/87878458" target="_blank" rel="noopener">https://blog.csdn.net/weixin_39800144/article/details/87878458</a></li>
+</ul>
+<p>ByteTCC 是一个基于 TCC（Try-Confirm-Cancel）机制的分布式事务管理器。兼容 JTA，可以和 spring、JavaEE 容器无缝集成。目前已经更新到 0.5.x 版本。考虑到 TCC 模式本身的复杂性，在复杂场景业务中，不推荐使用这种模式，复杂场景下，CC 逻辑的开发比较考验技术和对业务的了解，对开发人员要求较高。</p>
+<p>另外，ByteTCC 整合时需要注意不同的 Spring Boot 版本和 ByteTCC 版本要适配；总体而言，Spring Boot 1.x 得用 0.4.x 的版本，0.5.x 版本得用 Spring Boot 2.x。</p>
+<p><strong>3. Seata</strong></p>
+<ul>
+<li>文档：<a href="https://github.com/seata/seata/wiki" target="_blank" rel="noopener">https://github.com/seata/seata/wiki</a></li>
+<li>GitHub：<a href="https://github.com/seata/seata" target="_blank" rel="noopener">https://github.com/seata/seata</a></li>
+</ul>
+<p>Seata 是阿里巴巴开源的分布式事务中间件，以高效并且对业务 0 侵的方式，解决微服务场景下面临的分布式事务问题。由于 Seata 还在持续的大迭代，目前 AT（Automatic Transaction）模式，还不能覆盖所有场景，某些场景下，还需要 MT（Manual Transaction）模式，这种模式下，分支事务需要应用自己来定义业务本身及提交和回滚的逻辑。</p>
+<p>8 月份，发布 0.8.0 版本。</p>
+<p>在前文也提到过，Seata 对全局锁的控制思路，会很大程度上降低分布式事务处理带来的性能损耗，由于是阿里出品，而且基于阿里巴巴在 TXC 和 GTS 上的技术积累，以及海量业务的磨练，个人对 Seata 非常期待，觉得未来会是一个非常好的选择。</p>
+<p><strong>4. Hmily</strong></p>
+<p>Hmily 是一个基于 TCC 的开源框架。基于 Java 语言来开发（JDK 1.8），支持 Dubbo、Spring Cloud、Motan 等 RPC 框架进行分布式事务处理。</p>
+<ul>
+<li>文档：<a href="https://dromara.org/website/zh-cn/docs/hmily/index.html" target="_blank" rel="noopener">https://dromara.org/website/zh-cn/docs/hmily/index.html</a></li>
+<li>GitHub：<a href="https://github.com/Dromara/hmily" target="_blank" rel="noopener">https://github.com/Dromara/hmily</a></li>
+</ul>
+<p><strong>5. Raincat</strong></p>
+<p>强一致性分布式事务，是基于二阶段提交 + 本地事务补偿机制来实现。基于 Java 语言来开发（JDK 1.8），支持 Dubbo、Spring Cloud、Motan 等 RPC 框架进行分布式事务。</p>
+<ul>
+<li>文档：<a href="https://dromara.org/website/zh-cn/docs/raincat/index.html" target="_blank" rel="noopener">https://dromara.org/website/zh-cn/docs/raincat/index.html</a></li>
+<li>GitHub：<a href="https://github.com/Dromara/Raincat" target="_blank" rel="noopener">https://github.com/Dromara/Raincat</a></li>
+</ul>
+<p><strong>6. myth</strong></p>
+<p>采用消息队列解决分布式事务的开源框架，基于 Java 语言来开发（JDK 1.8），支持 Dubbo、Spring Cloud、Motan 等 RPC 框架进行分布式事务。</p>
+<ul>
+<li>文档：<a href="https://dromara.org/website/zh-cn/docs/myth/index.html" target="_blank" rel="noopener">https://dromara.org/website/zh-cn/docs/myth/index.html</a></li>
+<li>GitHub：<a href="https://github.com/Dromara/myth" target="_blank" rel="noopener">https://github.com/Dromara/myth</a></li>
+</ul>
+<p><strong>7. TCC-transaction</strong></p>
+<p>是一个基于 TCC 的开源框架。</p>
+<ul>
+<li>文档：<a href="https://github.com/changmingxie/TCC-transaction/wiki" target="_blank" rel="noopener">https://github.com/changmingxie/TCC-transaction/wiki</a></li>
+<li>GitHub：<a href="https://github.com/changmingxie/TCC-transaction" target="_blank" rel="noopener">https://github.com/changmingxie/TCC-transaction</a></li>
+</ul>
+<p>其他资料</p>
+<p>ACID、BASE、CAP 等基础概念：</p>
+<blockquote>
+<p><a href="https://mp.weixin.qq.com/s/GNoNZa7DbC57bg4Fo7Qerw" target="_blank" rel="noopener">https://mp.weixin.qq.com/s/GNoNZa7DbC57bg4Fo7Qerw</a></p>
+</blockquote>
+<hr>
+<p>本文首发于 GitChat，未经授权不得转载，转载需与 GitChat 联系。</p>
+
+            <div class="post-copyright">
+    <div class="content">
+        <p>最后更新： 2020年01月16日 10:28</p>
+        <p>原始链接： <a class="post-url" href="/2018/05/01/深入理解分布式事务/" title="深入理解分布式事务">https://java4all.cn/2018/05/01/深入理解分布式事务/</a></p>
+        <footer>
+            <a href="https://java4all.cn">
+                <img src="/images/logo3.jpg" alt="IT云清">
+                IT云清
+            </a>
+        </footer>
+    </div>
+</div>
+
+      
+        
+            
+
+        
+    </div>
+    <footer class="article-footer">
+        
+        
+<div class="post-share">
+    <a href="javascript:;" id="share-sub" class="post-share-fab">
+        <i class="fa fa-share-alt"></i>
+    </a>
+    <div class="post-share-list" id="share-list">
+        <ul class="share-icons">
+          <li>
+            <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=https://java4all.cn/2018/05/01/深入理解分布式事务/&title=《深入理解分布式事务》 — Hexo&pic=https://java4all.cn/images/电脑16.jpg" data-title="微博">
+              <i class="fa fa-weibo"></i>
+            </a>
+          </li>
+          <li>
+            <a class="weixin share-sns" id="wxFab" href="javascript:;" data-title="微信">
+              <i class="fa fa-weixin"></i>
+            </a>
+          </li>
+          <li>
+            <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=https://java4all.cn/2018/05/01/深入理解分布式事务/&title=《深入理解分布式事务》 — Hexo&source=" data-title="QQ">
+              <i class="fa fa-qq"></i>
+            </a>
+          </li>
+          <li>
+            <a class="facebook share-sns" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=https://java4all.cn/2018/05/01/深入理解分布式事务/" data-title="Facebook">
+              <i class="fa fa-facebook"></i>
+            </a>
+          </li>
+          <li>
+            <a class="twitter share-sns" target="_blank" href="https://twitter.com/intent/tweet?text=《深入理解分布式事务》 — Hexo&url=https://java4all.cn/2018/05/01/深入理解分布式事务/&via=https://java4all.cn" data-title="Twitter">
+              <i class="fa fa-twitter"></i>
+            </a>
+          </li>
+          <li>
+            <a class="google share-sns" target="_blank" href="https://plus.google.com/share?url=https://java4all.cn/2018/05/01/深入理解分布式事务/" data-title="Google+">
+              <i class="fa fa-google-plus"></i>
+            </a>
+          </li>
+        </ul>
+     </div>
+</div>
+<div class="post-modal wx-share" id="wxShare">
+    <a class="close" href="javascript:;" id="wxShare-close">×</a>
+    <p>扫一扫，分享到微信</p>
+    <img src="//api.qrserver.com/v1/create-qr-code/?data=https://java4all.cn/2018/05/01/深入理解分布式事务/" alt="微信分享二维码">
+</div>
+
+<div class="mask"></div>
+
+        
+        <ul class="article-footer-menu">
+            
+            
+  <li class="article-footer-tags">
+    <i class="fa fa-tags"></i>
+      
+    <a href="/tags/分布式事务/" class="color1">分布式事务</a>
+      
+    <a href="/tags/2pc/" class="color4">2pc</a>
+      
+    <a href="/tags/3pc/" class="color4">3pc</a>
+      
+    <a href="/tags/tcc/" class="color4">tcc</a>
+      
+  </li>
+
+        </ul>
+        
+    </footer>
+  </div>
+</article>
+
+
+    <aside class="post-toc-pos post-toc-top" id="post-toc">
+        <nav class="post-toc-wrap">
+            <ol class="post-toc"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#1-实际场景遇到的问题"><span class="post-toc-text">1. 实际场景遇到的问题</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#1-1-单体架构事务场景"><span class="post-toc-text">1.1 单体架构事务场景</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#1-2-微服务架构事务场景"><span class="post-toc-text">1.2 微服务架构事务场景</span></a></li></ol></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#2-分布式事务"><span class="post-toc-text">2. 分布式事务</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#3-2PC"><span class="post-toc-text">3. 2PC</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#3-1-理论基础"><span class="post-toc-text">3.1 理论基础</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#3-2-PC-实现"><span class="post-toc-text">3.2 PC 实现</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-5"><a class="post-toc-link" href="#3-2-1-准备阶段"><span class="post-toc-text">3.2.1 准备阶段</span></a></li><li class="post-toc-item post-toc-level-5"><a class="post-toc-link" href="#3-2-2-提交阶段"><span class="post-toc-text">3.2.2 提交阶段</span></a></li></ol></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#3-3-2PC-优缺点"><span class="post-toc-text">3.3 2PC 优缺点</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-5"><a class="post-toc-link" href="#3-3-1-同步阻塞问题"><span class="post-toc-text">3.3.1 同步阻塞问题</span></a></li><li class="post-toc-item post-toc-level-5"><a class="post-toc-link" href="#3-3-2-单点故障"><span class="post-toc-text">3.3.2 单点故障</span></a></li><li class="post-toc-item post-toc-level-5"><a class="post-toc-link" href="#3-3-3-数据不一致"><span class="post-toc-text">3.3.3 数据不一致</span></a></li><li class="post-toc-item post-toc-level-5"><a class="post-toc-link" href="#3-3-4-不确定性"><span class="post-toc-text">3.3.4 不确定性</span></a></li></ol></li></ol></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#4-3PC"><span class="post-toc-text">4. 3PC</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#4-1-理论基础"><span class="post-toc-text">4.1 理论基础</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#4-2-3PC-实现"><span class="post-toc-text">4.2 3PC 实现</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-5"><a class="post-toc-link" href="#4-2-1-CanCommit-阶段"><span class="post-toc-text">4.2.1 CanCommit 阶段</span></a></li><li class="post-toc-item post-toc-level-5"><a class="post-toc-link" href="#4-2-2-PreCommit-阶段"><span class="post-toc-text">4.2.2 PreCommit 阶段</span></a></li><li class="post-toc-item post-toc-level-5"><a class="post-toc-link" href="#4-3-3-DoCommit-阶段"><span class="post-toc-text">4.3.3 DoCommit 阶段</span></a></li></ol></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#4-3-3PC-优缺点"><span class="post-toc-text">4.3 3PC 优缺点</span></a></li></ol></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#5-TCC"><span class="post-toc-text">5. TCC</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#5-1-理论基础"><span class="post-toc-text">5.1 理论基础</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#5-2-TCC-实现"><span class="post-toc-text">5.2 TCC 实现</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#5-3-落地"><span class="post-toc-text">5.3 落地</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#5-4-TCC-优缺点"><span class="post-toc-text">5.4 TCC 优缺点</span></a></li></ol></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#6-分布式事务解决方案"><span class="post-toc-text">6. 分布式事务解决方案</span></a></li></ol>
+        </nav>
+    </aside>
+    
+
+<nav id="article-nav">
+  
+    <a href="/2019/10/01/Seata中事务隔离性与锁分析/" id="article-nav-newer" class="article-nav-link-wrap">
+
+      <span class="article-nav-title">
+        <i class="fa fa-hand-o-left" aria-hidden="true"></i>
+        
+          Seata中事务隔离性与锁分析
+        
+      </span>
+    </a>
+  
+  
+    <a href="/2018/01/09/Redission分布式锁加锁原理源码解析/" id="article-nav-older" class="article-nav-link-wrap">
+      <span class="article-nav-title">Redission分布式锁加锁原理源码解析</span>
+      <i class="fa fa-hand-o-right" aria-hidden="true"></i>
+    </a>
+  
+</nav>
+
+
+
+    
+</section>
+        
+      </div>
+      <footer id="footer">
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      
+<p>
+    <span id="busuanzi_container_site_uv" style='display:none'>
+        今日访客数：<span id="busuanzi_value_site_uv"></span>
+    </span>
+    <span id="busuanzi_container_site_pv" style='display:none'>
+        今日访问量：<span id="busuanzi_value_site_pv"></span>
+    </span>
+</p>
+
+
+      <p>
+        Powered by  <a href="http://hexo.io/" target="_blank">Hexo</a>
+        Theme <a href="//github.com/wongminho/hexo-theme-miho" target="_blank">MiHo</a>
+      &copy; 2020 IT云清<br>
+      </p>
+    </div>
+  </div>
+</footer>
+    <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+<script src="//cdn.bootcss.com/jquery/3.2.1/jquery.min.js"></script>
+<script>
+  var mihoConfig = {
+      root: "https://java4all.cn",
+      animate: true,
+      isHome: false,
+      share: true,
+      reward: 0
+  }
+</script>
+<div class="sidebar">
+    <div id="sidebar-search" title="Search">
+        <i class="fa fa-search"></i>
+    </div>
+    <div id="sidebar-category" title="Categories">
+        <i class="fa fa-book"></i>
+    </div>
+    <div id="sidebar-tag" title="Tags">
+        <i class="fa fa-tags"></i>
+    </div>
+    <div id="sidebar-top">
+        <span class="sidebar-top-icon"><i class="fa fa-angle-up"></i></span>
+    </div>
+</div>
+<div class="sidebar-menu-box" id="sidebar-menu-box">
+    <div class="sidebar-menu-box-container">
+        <div id="sidebar-menu-box-categories">
+            <a class="category-link" href="/categories/Redission/">Redission</a><a class="category-link" href="/categories/Seata/">Seata</a><a class="category-link" href="/categories/SpringCloud/">SpringCloud</a><a class="category-link" href="/categories/分布式事务/">分布式事务</a><a class="category-link" href="/categories/管理/">管理</a>
+        </div>
+        <div id="sidebar-menu-box-tags">
+            <a href="/tags/2pc/" style="font-size: 10px;">2pc</a> <a href="/tags/3pc/" style="font-size: 10px;">3pc</a> <a href="/tags/Eureka/" style="font-size: 10px;">Eureka</a> <a href="/tags/Feign/" style="font-size: 15px;">Feign</a> <a href="/tags/Hystrix/" style="font-size: 15px;">Hystrix</a> <a href="/tags/Java/" style="font-size: 15px;">Java</a> <a href="/tags/Redission/" style="font-size: 10px;">Redission</a> <a href="/tags/Ribbon/" style="font-size: 15px;">Ribbon</a> <a href="/tags/Seata/" style="font-size: 15px;">Seata</a> <a href="/tags/SpringCloud/" style="font-size: 20px;">SpringCloud</a> <a href="/tags/Zuul/" style="font-size: 10px;">Zuul</a> <a href="/tags/code-review/" style="font-size: 10px;">code review</a> <a href="/tags/eureka/" style="font-size: 10px;">eureka</a> <a href="/tags/tcc/" style="font-size: 10px;">tcc</a> <a href="/tags/分布式事务/" style="font-size: 15px;">分布式事务</a> <a href="/tags/分布式锁/" style="font-size: 10px;">分布式锁</a> <a href="/tags/管理/" style="font-size: 10px;">管理</a>
+        </div>
+    </div>
+    <a href="javascript:;" class="sidebar-menu-box-close">&times;</a>
+</div>
+<div class="mobile-header-menu-nav" id="mobile-header-menu-nav">
+    <div class="mobile-header-menu-container">
+        <span class="title">Menus</span>
+        <ul class="mobile-header-menu-navbar">
+            
+            <li>
+                <a  href="/">
+                    <i class="fa fa-home"></i><span>Home</span>
+                </a>
+            </li>
+            
+            <li>
+                <a  href="/archives">
+                    <i class="fa fa-archive"></i><span>Archives</span>
+                </a>
+            </li>
+            
+            <li>
+                <a  href="/about">
+                    <i class="fa fa-user"></i><span>About</span>
+                </a>
+            </li>
+            
+        </ul>
+    </div>
+    <div class="mobile-header-tag-container">
+        <span class="title">Tags</span>
+        <div id="mobile-header-container-tags">
+            <a href="/tags/2pc/" style="font-size: 10px;">2pc</a> <a href="/tags/3pc/" style="font-size: 10px;">3pc</a> <a href="/tags/Eureka/" style="font-size: 10px;">Eureka</a> <a href="/tags/Feign/" style="font-size: 15px;">Feign</a> <a href="/tags/Hystrix/" style="font-size: 15px;">Hystrix</a> <a href="/tags/Java/" style="font-size: 15px;">Java</a> <a href="/tags/Redission/" style="font-size: 10px;">Redission</a> <a href="/tags/Ribbon/" style="font-size: 15px;">Ribbon</a> <a href="/tags/Seata/" style="font-size: 15px;">Seata</a> <a href="/tags/SpringCloud/" style="font-size: 20px;">SpringCloud</a> <a href="/tags/Zuul/" style="font-size: 10px;">Zuul</a> <a href="/tags/code-review/" style="font-size: 10px;">code review</a> <a href="/tags/eureka/" style="font-size: 10px;">eureka</a> <a href="/tags/tcc/" style="font-size: 10px;">tcc</a> <a href="/tags/分布式事务/" style="font-size: 15px;">分布式事务</a> <a href="/tags/分布式锁/" style="font-size: 10px;">分布式锁</a> <a href="/tags/管理/" style="font-size: 10px;">管理</a>
+        </div>
+    </div>
+</div>
+<div class="search-wrap">
+    <span class="search-close">&times;</span>
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="back">
+            <i class="icon icon-lg icon-chevron-left"></i>
+        </a>
+        <input class="search-field" placeholder="Search..." id="keywords">
+        <a id="search-submit" href="javascript:;">
+            <i class="fa fa-search"></i>
+        </a>
+    <div class="search-container" id="search-container">
+        <ul class="search-result" id="search-result">
+        </ul>
+    </div>
+</div>
+
+<div id="search-tpl">
+    <li class="search-result-item">
+        <a href="{url}" class="search-item-li">
+            <span class="search-item-li-title" title="{title}">{title}</span>
+        </a>
+    </li>
+</div>
+<script src="/js/search.js"></script>
+<script src="/js/main.js"></script>
+
+
+  <script src="//cdn.bootcss.com/particles.js/2.0.0/particles.min.js"></script>
+  <div id="particles"></div>
+  <script src="/js/particles.js"></script>
+
+
+
+
+
+
+
+  <link rel="stylesheet" href="//cdn.bootcss.com/animate.css/3.5.0/animate.min.css">
+  <script src="//cdn.bootcss.com/scrollReveal.js/3.0.5/scrollreveal.js"></script>
+  <script src="/js/animate.js"></script>
+
+
+  <script src="/js/pop-img.js"></script>
+  <script>
+     $(".article-entry p img").popImg();
+  </script>
+
+  </div>
+</body>
+</html>
