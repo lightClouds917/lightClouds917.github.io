@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html>
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="utf-8">
+  
+  <title>分布式锁系列--03关于分布式锁的选型分析01 | Hexo</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  
+    <meta name="keywords" content="IT云清的博客">
+  
+  <meta name="description" content="本文分析，在分布式系统中，使用redis实现分布式锁，会遇到什么问题。关于分布式锁概念和redis分布式锁的具体实现，可参考前面的2篇文章。本文重点在于，对分布式锁技术选型的分析。 1.redis锁单节点实现常规的，使用redis做分布式锁，主要实现如下： 1.1加锁1234567891011121314151617181920212223242526272829/** * 加锁 * * @par">
+<meta name="keywords" content="分布式锁">
+<meta property="og:type" content="article">
+<meta property="og:title" content="分布式锁系列--03关于分布式锁的选型分析01">
+<meta property="og:url" content="https://java4all.cn/2018/01/19/分布式锁系列--03关于分布式锁的选型分析01/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="本文分析，在分布式系统中，使用redis实现分布式锁，会遇到什么问题。关于分布式锁概念和redis分布式锁的具体实现，可参考前面的2篇文章。本文重点在于，对分布式锁技术选型的分析。 1.redis锁单节点实现常规的，使用redis做分布式锁，主要实现如下： 1.1加锁1234567891011121314151617181920212223242526272829/** * 加锁 * * @par">
+<meta property="og:locale" content="en">
+<meta property="og:updated_time" content="2020-01-19T03:00:27.677Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="分布式锁系列--03关于分布式锁的选型分析01">
+<meta name="twitter:description" content="本文分析，在分布式系统中，使用redis实现分布式锁，会遇到什么问题。关于分布式锁概念和redis分布式锁的具体实现，可参考前面的2篇文章。本文重点在于，对分布式锁技术选型的分析。 1.redis锁单节点实现常规的，使用redis做分布式锁，主要实现如下： 1.1加锁1234567891011121314151617181920212223242526272829/** * 加锁 * * @par">
+  
+  
+    <link rel="icon" href="/my.icon">
+  
+  <link href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+  <link rel="stylesheet" href="/css/style.css">
+  <script src="/js/pace.min.js"></script>
+  
+
+  
+  
+
+</head>
+</html>
+<body>
+  <div id="container">
+      <header id="header">
+    <div id="banner"></div>
+    <div id="header-outer">
+        <div id="header-menu" class="header-menu-pos animated">
+            <div class="header-menu-container">
+                <a href="/" class="left">
+                    <span class="site-title">IT云清</span>
+                </a>
+                <nav id="header-menu-nav" class="right">
+                    
+                    <a  href="/">
+                        <i class="fa fa-home"></i>
+                        <span>Home</span>
+                    </a>
+                    
+                    <a  href="/archives">
+                        <i class="fa fa-archive"></i>
+                        <span>Archives</span>
+                    </a>
+                    
+                    <a  href="/about">
+                        <i class="fa fa-user"></i>
+                        <span>About</span>
+                    </a>
+                    
+                </nav>
+                <a class="mobile-header-menu-button">
+                    <i class="fa fa-bars"></i>
+                </a>
+            </div>
+        </div>
+        <div id="header-row">
+            <div id="logo">
+                <a href="/">
+                    <img src="/images/logo3.jpg" alt="logo">
+                </a>
+            </div>
+            <div class="header-info">
+                <div id="header-title">
+                    
+                    <h2>
+                        IT云清
+                    </h2>
+                    
+                </div>
+                <div id="header-description">
+                    
+                    <h3>
+                        专注于JAVA
+                    </h3>
+                    
+                </div>
+            </div>
+            <nav class="header-nav">
+                <div class="social">
+                    
+                        <a title="IT云清" target="_blank" href="//java4all.cn">
+                            <i class="fa fa-home fa-2x"></i></a>
+                    
+                        <a title="Github" target="_blank" href="//github.com/lightClouds917">
+                            <i class="fa fa-github fa-2x"></i></a>
+                    
+                        <a title="CSDN" target="_blank" href="//it4all.blog.csdn.net">
+                            <i class="fa fa-twitter fa-2x"></i></a>
+                    
+                        <a title="Wechat" target="_blank" href="//java4all.cn/images/wechat_code_me.png">
+                            <i class="fa fa-weixin fa-2x"></i></a>
+                    
+                </div>
+            </nav>
+        </div>
+    </div>
+</header>
+      <div class="outer">
+        <section id="main" class="body-wrap"><article id="post-分布式锁系列--03关于分布式锁的选型分析01" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 class="post-title" itemprop="name">
+      分布式锁系列--03关于分布式锁的选型分析01
+    </h1>
+    <div class="post-title-bar">
+      <ul>
+          
+              <li>
+                  <i class="fa fa-book"></i>
+                  
+                      <a href="/categories/分布式锁/">分布式锁</a>
+                  
+              </li>
+          
+        <li>
+          <i class="fa fa-calendar"></i>  2018-01-19
+        </li>
+        <li>
+          <i class="fa fa-eye"></i>
+          <span id="busuanzi_value_page_pv"></span>
+        </li>
+      </ul>
+    </div>
+  
+
+          
+      </header>
+    
+    <div class="article-entry post-content" itemprop="articleBody">
+      
+            
+            <p>本文分析，在分布式系统中，使用redis实现分布式锁，会遇到什么问题。关于<a href="https://java4all.cn/2018/01/17/%E5%88%86%E5%B8%83%E5%BC%8F%E9%94%81%E7%B3%BB%E5%88%97--01%E5%88%86%E5%B8%83%E5%BC%8F%E9%94%81%E5%85%A5%E9%97%A8%E4%BB%8B%E7%BB%8D/">分布式锁概念</a>和<a href="https://java4all.cn/2018/01/18/%E5%88%86%E5%B8%83%E5%BC%8F%E9%94%81%E7%B3%BB%E5%88%97--02Redis%E5%AE%9E%E7%8E%B0%E5%88%86%E5%B8%83%E5%BC%8F%E9%94%81/">redis分布式锁的具体实现</a>，可参考前面的<a href="https://blog.csdn.net/weixin_39800144/column/info/30988" target="_blank" rel="noopener">2篇文章</a>。本文重点在于，对分布式锁技术选型的分析。</p>
+<h3 id="1-redis锁单节点实现"><a href="#1-redis锁单节点实现" class="headerlink" title="1.redis锁单节点实现"></a>1.redis锁单节点实现</h3><p>常规的，使用redis做分布式锁，主要实现如下：</p>
+<h4 id="1-1加锁"><a href="#1-1加锁" class="headerlink" title="1.1加锁"></a>1.1加锁</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line">/**</span><br><span class="line"> * 加锁</span><br><span class="line"> *</span><br><span class="line"> * @param lockName 锁名，对应被争用的共享资源</span><br><span class="line"> * @param randomValue 随机值，需要保持全局唯一，便于释放时校验锁的持有者</span><br><span class="line"> * @param expireTime 过期时间，到期后自动释放，防止出现问题时死锁，资源无法释放</span><br><span class="line"> * @return</span><br><span class="line"> */</span><br><span class="line">public static boolean acquireLock(String lockName,String randomValue,int expireTime)&#123;</span><br><span class="line">  Jedis jedis = jedisPool.getResource();</span><br><span class="line">  try &#123;</span><br><span class="line">    while (true)&#123;</span><br><span class="line">      String result = jedis</span><br><span class="line">          .set(lockName, randomValue, SET_IF_NOT_EXIST, SET_WITH_EXPIRE_TIME, expireTime);</span><br><span class="line">      if(LOCK_SUCCESS.equals(result))&#123;</span><br><span class="line">        logger.info(&quot;【Redis lock】success to acquire lock for [ &quot;+lockName+&quot; ],expire time:&quot;+expireTime+&quot;ms&quot;);</span><br><span class="line">        return true;</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;catch (Exception ex)&#123;</span><br><span class="line">    ex.printStackTrace();</span><br><span class="line">  &#125;finally &#123;</span><br><span class="line">    if(null != jedis)&#123;</span><br><span class="line">      jedis.close();</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">  logger.info(&quot;【Redis lock】failed to acquire lock for [ &quot;+lockName+&quot; ]&quot;);</span><br><span class="line">  return false;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="1-2解锁"><a href="#1-2解锁" class="headerlink" title="1.2解锁"></a>1.2解锁</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line">/**</span><br><span class="line"> * redis释放锁</span><br><span class="line"> * watch和muti命令保证释放时的对等性，防止误解锁</span><br><span class="line"> *</span><br><span class="line"> * @param lockName 锁名，对应被争用的共享资源</span><br><span class="line"> * @param randomValue 随机值，需要保持全局唯一，以检验锁的持有者</span><br><span class="line"> * @return 是否释放成功</span><br><span class="line"> */</span><br><span class="line">public static boolean releaseLock(String lockName,String randomValue)&#123;</span><br><span class="line">  Jedis jedis = jedisPool.getResource();</span><br><span class="line">  try&#123;</span><br><span class="line">    jedis.watch(lockName);//watch监控</span><br><span class="line">    if(randomValue.equals(jedis.get(lockName)))&#123;</span><br><span class="line">      Transaction multi = jedis.multi();//开启事务</span><br><span class="line">      multi.del(lockName);//添加操作到事务</span><br><span class="line">      List&lt;Object&gt; exec = multi.exec();//执行事务</span><br><span class="line">      if(RELEASE_SUCCESS.equals(exec.size()))&#123;</span><br><span class="line">        logger.info(&quot;【Redis lock】success to release lock for [ &quot;+lockName+&quot; ]&quot;);</span><br><span class="line">        return true;</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;catch (Exception ex)&#123;</span><br><span class="line">    logger.info(&quot;【Redis lock】failed to release lock for [ &quot;+lockName+&quot; ]&quot;);</span><br><span class="line">    ex.printStackTrace();</span><br><span class="line">  &#125;finally &#123;</span><br><span class="line">    if(null != jedis)&#123;</span><br><span class="line">      jedis.unwatch();</span><br><span class="line">      jedis.close();</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">  return false;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="2-redis锁单节点分析"><a href="#2-redis锁单节点分析" class="headerlink" title="2.redis锁单节点分析"></a>2.redis锁单节点分析</h3><p>基于单点redis的锁实现，上述这种实现，基本达到了单节点的安全限度，解决了如下几个问题：</p>
+<h4 id="1-防止死锁"><a href="#1-防止死锁" class="headerlink" title="1.防止死锁"></a>1.防止死锁</h4><p>设置过期时间后，即使客户端挂了，加锁后未解锁，这个锁也是会到期释放的，不存在死锁的可能。</p>
+<p>典型的死锁场景：</p>
+<blockquote>
+<p>一个客户端获取锁成功，但是在释放锁之前崩溃了，此时该客户端实际上已经失去了对公共资源的操作权，但却没有办法请求解锁（删除 key-value 键值对），那么，它就会一直持有这个锁，而其它客户端永远无法获得锁。</p>
+</blockquote>
+<h4 id="2-对称性"><a href="#2-对称性" class="headerlink" title="2.对称性"></a>2.对称性</h4><p>加锁的时候，我们给锁设置了个随机值，保证了即使在如下情况，解锁也是只会释放自己加的锁，而不会误删。<br>典型的误删场景：</p>
+<blockquote>
+<p>假如获取锁时SET的不是一个随机字符串，而是一个固定值，那么可能会发生下面的执行序列：</p>
+<ol>
+<li>客户端1获取锁成功。</li>
+<li>客户端1在某个操作上阻塞了很长时间。</li>
+<li>过期时间到了，锁自动释放了。</li>
+<li>客户端2获取到了对应同一个资源的锁。</li>
+<li>客户端1从阻塞中恢复过来，释放掉了客户端2持有的锁。</li>
+</ol>
+</blockquote>
+<p>此时，如果客户端2访问共享资源，就没有锁来提供资源保护了。</p>
+<h4 id="3-互斥性"><a href="#3-互斥性" class="headerlink" title="3.互斥性"></a>3.互斥性</h4><p>一个时刻只能有一个客户端可以得到锁，这个由redis自身命令setnx即可得到保证。</p>
+<h4 id="4-解锁"><a href="#4-解锁" class="headerlink" title="4.解锁"></a>4.解锁</h4><p>释放锁，包含3个操作，”get”、”判断”、”del”，我们必须保证释放锁时，这三个操作是原子性的。有2种方式来保证这一批操作的原子性。</p>
+<ul>
+<li>1.我们可以执行lua脚本，来保证删除操作的原子性。</li>
+<li>2.使用redis提供的watch机制，如前文的实现，来保证。<blockquote>
+<p>如果三个操作的原子性得不到保证，下面的场景，就会出问题：</p>
+</blockquote>
+</li>
+</ul>
+<ol>
+<li>客户端1获取锁成功。</li>
+<li>客户端1访问共享资源。</li>
+<li>客户端1为了释放锁，先执行’GET’操作获取随机字符串的值。</li>
+<li>客户端1判断随机字符串的值，与预期的值相等。</li>
+<li>客户端1由于某个原因阻塞住了很长时间。</li>
+<li>过期时间到了，锁自动释放了。</li>
+<li>客户端2获取到了对应同一个资源的锁。</li>
+<li>客户端1从阻塞中恢复过来，执行DEL操纵，释放掉了客户端2持有的锁。</li>
+</ol>
+<p>前面的4个问题，如果我们自己单节点实现时，可以考虑到，代码层面都是可以正确处理的。那么，还有一个问题，如何做到高可用呢？</p>
+<h4 id="5-高可用"><a href="#5-高可用" class="headerlink" title="5.高可用"></a>5.高可用</h4><p>单节点，存在挂机的风险，为了达到高可用，我们可以做redis集群。一个redis节点作为master，master挂一个slave，当master挂掉后，自动切到slave节点。</p>
+<p>看上去，前面5个问题都得到了解决。</p>
+<blockquote>
+<p>但是，在集群模式下，考虑一个场景：</p>
+<ol>
+<li>客户端1从Master获取了锁。</li>
+<li>Master宕机了，存储锁的key还没有来得及同步到Slave上。</li>
+<li>Slave升级为Master。</li>
+<li>客户端2从新的Master获取到了对应同一个资源的锁。</li>
+</ol>
+</blockquote>
+<p>由于redis的主从复制是异步的，这可能导致，在failover的过程中，资源丧失了锁带来的安全性。</p>
+<p>这是我们使用redis实现锁遇到的第一个问题。</p>
+<h4 id="6-参数的选择"><a href="#6-参数的选择" class="headerlink" title="6.参数的选择"></a>6.参数的选择</h4><blockquote>
+<p>在前文的算法中，我们给锁设置了有效期，这个值，究竟多少合适呢？</p>
+</blockquote>
+<p>如果太短，锁可能在客户端还未完成对资源的操作之前就过期，从而失去了保护；</p>
+<p>如果太长，一个客户端如果主动释放锁失败了，那么，需要等到过期时间才会被动释放，那么，在漫长的有效期内，其他客户端，都无法获得这个资源的锁。</p>
+<p>这是我们使用redis实现锁遇到的第二个问题。</p>
+
+            <div class="post-copyright">
+    <div class="content">
+        <p>最后更新： 2020年01月19日 11:00</p>
+        <p>原始链接： <a class="post-url" href="/2018/01/19/分布式锁系列--03关于分布式锁的选型分析01/" title="分布式锁系列--03关于分布式锁的选型分析01">https://java4all.cn/2018/01/19/分布式锁系列--03关于分布式锁的选型分析01/</a></p>
+        <footer>
+            <a href="https://java4all.cn">
+                <img src="/images/logo3.jpg" alt="IT云清">
+                IT云清
+            </a>
+        </footer>
+    </div>
+</div>
+
+      
+        
+            
+
+        
+    </div>
+    <footer class="article-footer">
+        
+        
+<div class="post-share">
+    <a href="javascript:;" id="share-sub" class="post-share-fab">
+        <i class="fa fa-share-alt"></i>
+    </a>
+    <div class="post-share-list" id="share-list">
+        <ul class="share-icons">
+          <li>
+            <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=https://java4all.cn/2018/01/19/分布式锁系列--03关于分布式锁的选型分析01/&title=《分布式锁系列--03关于分布式锁的选型分析01》 — Hexo&pic=https://java4all.cn/images/电脑12.jpg" data-title="微博">
+              <i class="fa fa-weibo"></i>
+            </a>
+          </li>
+          <li>
+            <a class="weixin share-sns" id="wxFab" href="javascript:;" data-title="微信">
+              <i class="fa fa-weixin"></i>
+            </a>
+          </li>
+          <li>
+            <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=https://java4all.cn/2018/01/19/分布式锁系列--03关于分布式锁的选型分析01/&title=《分布式锁系列--03关于分布式锁的选型分析01》 — Hexo&source=" data-title="QQ">
+              <i class="fa fa-qq"></i>
+            </a>
+          </li>
+          <li>
+            <a class="facebook share-sns" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=https://java4all.cn/2018/01/19/分布式锁系列--03关于分布式锁的选型分析01/" data-title="Facebook">
+              <i class="fa fa-facebook"></i>
+            </a>
+          </li>
+          <li>
+            <a class="twitter share-sns" target="_blank" href="https://twitter.com/intent/tweet?text=《分布式锁系列--03关于分布式锁的选型分析01》 — Hexo&url=https://java4all.cn/2018/01/19/分布式锁系列--03关于分布式锁的选型分析01/&via=https://java4all.cn" data-title="Twitter">
+              <i class="fa fa-twitter"></i>
+            </a>
+          </li>
+          <li>
+            <a class="google share-sns" target="_blank" href="https://plus.google.com/share?url=https://java4all.cn/2018/01/19/分布式锁系列--03关于分布式锁的选型分析01/" data-title="Google+">
+              <i class="fa fa-google-plus"></i>
+            </a>
+          </li>
+        </ul>
+     </div>
+</div>
+<div class="post-modal wx-share" id="wxShare">
+    <a class="close" href="javascript:;" id="wxShare-close">×</a>
+    <p>扫一扫，分享到微信</p>
+    <img src="//api.qrserver.com/v1/create-qr-code/?data=https://java4all.cn/2018/01/19/分布式锁系列--03关于分布式锁的选型分析01/" alt="微信分享二维码">
+</div>
+
+<div class="mask"></div>
+
+        
+        <ul class="article-footer-menu">
+            
+            
+  <li class="article-footer-tags">
+    <i class="fa fa-tags"></i>
+      
+    <a href="/tags/分布式锁/" class="color5">分布式锁</a>
+      
+  </li>
+
+        </ul>
+        
+    </footer>
+  </div>
+</article>
+
+
+    <aside class="post-toc-pos post-toc-top" id="post-toc">
+        <nav class="post-toc-wrap">
+            <ol class="post-toc"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#1-redis锁单节点实现"><span class="post-toc-text">1.redis锁单节点实现</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#1-1加锁"><span class="post-toc-text">1.1加锁</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#1-2解锁"><span class="post-toc-text">1.2解锁</span></a></li></ol></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#2-redis锁单节点分析"><span class="post-toc-text">2.redis锁单节点分析</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#1-防止死锁"><span class="post-toc-text">1.防止死锁</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#2-对称性"><span class="post-toc-text">2.对称性</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#3-互斥性"><span class="post-toc-text">3.互斥性</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#4-解锁"><span class="post-toc-text">4.解锁</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#5-高可用"><span class="post-toc-text">5.高可用</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#6-参数的选择"><span class="post-toc-text">6.参数的选择</span></a></li></ol></li></ol>
+        </nav>
+    </aside>
+    
+
+<nav id="article-nav">
+  
+    <a href="/2018/05/01/深入理解分布式事务/" id="article-nav-newer" class="article-nav-link-wrap">
+
+      <span class="article-nav-title">
+        <i class="fa fa-hand-o-left" aria-hidden="true"></i>
+        
+          深入理解分布式事务
+        
+      </span>
+    </a>
+  
+  
+    <a href="/2018/01/18/分布式锁系列--02Redis实现分布式锁/" id="article-nav-older" class="article-nav-link-wrap">
+      <span class="article-nav-title">分布式锁系列--02Redis实现分布式锁</span>
+      <i class="fa fa-hand-o-right" aria-hidden="true"></i>
+    </a>
+  
+</nav>
+
+
+
+    
+</section>
+        
+      </div>
+      <footer id="footer">
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      
+<p>
+    <span id="busuanzi_container_site_uv" style='display:none'>
+        今日访客数：<span id="busuanzi_value_site_uv"></span>
+    </span>
+    <span id="busuanzi_container_site_pv" style='display:none'>
+        今日访问量：<span id="busuanzi_value_site_pv"></span>
+    </span>
+</p>
+
+
+      <p>
+        Powered by  <a href="http://hexo.io/" target="_blank">Hexo</a>
+        Theme <a href="//github.com/wongminho/hexo-theme-miho" target="_blank">MiHo</a>
+      &copy; 2020 IT云清<br>
+      </p>
+    </div>
+  </div>
+</footer>
+    <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+<script src="//cdn.bootcss.com/jquery/3.2.1/jquery.min.js"></script>
+<script>
+  var mihoConfig = {
+      root: "https://java4all.cn",
+      animate: true,
+      isHome: false,
+      share: true,
+      reward: 0
+  }
+</script>
+<div class="sidebar">
+    <div id="sidebar-search" title="Search">
+        <i class="fa fa-search"></i>
+    </div>
+    <div id="sidebar-category" title="Categories">
+        <i class="fa fa-book"></i>
+    </div>
+    <div id="sidebar-tag" title="Tags">
+        <i class="fa fa-tags"></i>
+    </div>
+    <div id="sidebar-top">
+        <span class="sidebar-top-icon"><i class="fa fa-angle-up"></i></span>
+    </div>
+</div>
+<div class="sidebar-menu-box" id="sidebar-menu-box">
+    <div class="sidebar-menu-box-container">
+        <div id="sidebar-menu-box-categories">
+            <a class="category-link" href="/categories/Redission/">Redission</a><a class="category-link" href="/categories/Seata/">Seata</a><a class="category-link" href="/categories/SpringCloud/">SpringCloud</a><a class="category-link" href="/categories/linux/">linux</a><a class="category-link" href="/categories/shell/">shell</a><a class="category-link" href="/categories/分布式事务/">分布式事务</a><a class="category-link" href="/categories/分布式锁/">分布式锁</a><a class="category-link" href="/categories/模板/">模板</a><a class="category-link" href="/categories/管理/">管理</a>
+        </div>
+        <div id="sidebar-menu-box-tags">
+            <a href="/tags/2pc/" style="font-size: 10px;">2pc</a> <a href="/tags/3pc/" style="font-size: 10px;">3pc</a> <a href="/tags/Eureka/" style="font-size: 10px;">Eureka</a> <a href="/tags/Feign/" style="font-size: 13.33px;">Feign</a> <a href="/tags/Hystrix/" style="font-size: 13.33px;">Hystrix</a> <a href="/tags/Java/" style="font-size: 13.33px;">Java</a> <a href="/tags/Redission/" style="font-size: 10px;">Redission</a> <a href="/tags/Ribbon/" style="font-size: 13.33px;">Ribbon</a> <a href="/tags/Seata/" style="font-size: 16.67px;">Seata</a> <a href="/tags/SpringCloud/" style="font-size: 20px;">SpringCloud</a> <a href="/tags/Zuul/" style="font-size: 10px;">Zuul</a> <a href="/tags/code-review/" style="font-size: 10px;">code review</a> <a href="/tags/eureka/" style="font-size: 10px;">eureka</a> <a href="/tags/linux/" style="font-size: 13.33px;">linux</a> <a href="/tags/redis/" style="font-size: 10px;">redis</a> <a href="/tags/shell/" style="font-size: 10px;">shell</a> <a href="/tags/tcc/" style="font-size: 10px;">tcc</a> <a href="/tags/分布式事务/" style="font-size: 16.67px;">分布式事务</a> <a href="/tags/分布式锁/" style="font-size: 16.67px;">分布式锁</a> <a href="/tags/磁盘/" style="font-size: 10px;">磁盘</a> <a href="/tags/管理/" style="font-size: 10px;">管理</a>
+        </div>
+    </div>
+    <a href="javascript:;" class="sidebar-menu-box-close">&times;</a>
+</div>
+<div class="mobile-header-menu-nav" id="mobile-header-menu-nav">
+    <div class="mobile-header-menu-container">
+        <span class="title">Menus</span>
+        <ul class="mobile-header-menu-navbar">
+            
+            <li>
+                <a  href="/">
+                    <i class="fa fa-home"></i><span>Home</span>
+                </a>
+            </li>
+            
+            <li>
+                <a  href="/archives">
+                    <i class="fa fa-archive"></i><span>Archives</span>
+                </a>
+            </li>
+            
+            <li>
+                <a  href="/about">
+                    <i class="fa fa-user"></i><span>About</span>
+                </a>
+            </li>
+            
+        </ul>
+    </div>
+    <div class="mobile-header-tag-container">
+        <span class="title">Tags</span>
+        <div id="mobile-header-container-tags">
+            <a href="/tags/2pc/" style="font-size: 10px;">2pc</a> <a href="/tags/3pc/" style="font-size: 10px;">3pc</a> <a href="/tags/Eureka/" style="font-size: 10px;">Eureka</a> <a href="/tags/Feign/" style="font-size: 13.33px;">Feign</a> <a href="/tags/Hystrix/" style="font-size: 13.33px;">Hystrix</a> <a href="/tags/Java/" style="font-size: 13.33px;">Java</a> <a href="/tags/Redission/" style="font-size: 10px;">Redission</a> <a href="/tags/Ribbon/" style="font-size: 13.33px;">Ribbon</a> <a href="/tags/Seata/" style="font-size: 16.67px;">Seata</a> <a href="/tags/SpringCloud/" style="font-size: 20px;">SpringCloud</a> <a href="/tags/Zuul/" style="font-size: 10px;">Zuul</a> <a href="/tags/code-review/" style="font-size: 10px;">code review</a> <a href="/tags/eureka/" style="font-size: 10px;">eureka</a> <a href="/tags/linux/" style="font-size: 13.33px;">linux</a> <a href="/tags/redis/" style="font-size: 10px;">redis</a> <a href="/tags/shell/" style="font-size: 10px;">shell</a> <a href="/tags/tcc/" style="font-size: 10px;">tcc</a> <a href="/tags/分布式事务/" style="font-size: 16.67px;">分布式事务</a> <a href="/tags/分布式锁/" style="font-size: 16.67px;">分布式锁</a> <a href="/tags/磁盘/" style="font-size: 10px;">磁盘</a> <a href="/tags/管理/" style="font-size: 10px;">管理</a>
+        </div>
+    </div>
+</div>
+<div class="search-wrap">
+    <span class="search-close">&times;</span>
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="back">
+            <i class="icon icon-lg icon-chevron-left"></i>
+        </a>
+        <input class="search-field" placeholder="Search..." id="keywords">
+        <a id="search-submit" href="javascript:;">
+            <i class="fa fa-search"></i>
+        </a>
+    <div class="search-container" id="search-container">
+        <ul class="search-result" id="search-result">
+        </ul>
+    </div>
+</div>
+
+<div id="search-tpl">
+    <li class="search-result-item">
+        <a href="{url}" class="search-item-li">
+            <span class="search-item-li-title" title="{title}">{title}</span>
+        </a>
+    </li>
+</div>
+<script src="/js/search.js"></script>
+<script src="/js/main.js"></script>
+
+
+  <script src="//cdn.bootcss.com/particles.js/2.0.0/particles.min.js"></script>
+  <div id="particles"></div>
+  <script src="/js/particles.js"></script>
+
+
+
+
+
+
+
+  <link rel="stylesheet" href="//cdn.bootcss.com/animate.css/3.5.0/animate.min.css">
+  <script src="//cdn.bootcss.com/scrollReveal.js/3.0.5/scrollreveal.js"></script>
+  <script src="/js/animate.js"></script>
+
+
+  <script src="/js/pop-img.js"></script>
+  <script>
+     $(".article-entry p img").popImg();
+  </script>
+
+  </div>
+</body>
+</html>

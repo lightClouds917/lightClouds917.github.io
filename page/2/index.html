@@ -107,6 +107,72 @@
       <div class="outer">
         <section id="main" class="body-wrap">
   
+    <article id="post-Redission分布式锁加锁原理源码解析" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2018/01/09/Redission分布式锁加锁原理源码解析/"  >Redission分布式锁加锁原理源码解析</a>
+    </h1>
+  
+
+          
+              <span class="header-cate">
+                <i class="fa fa-map-marker"></i>
+                  
+                  <a href="/categories/Redission/">Redission</a>
+                  
+              </span>
+          
+      </header>
+    
+    <div class="article-entry " itemprop="articleBody">
+      
+        <div class="article-img">
+            <a href="/2018/01/09/Redission分布式锁加锁原理源码解析/" >
+                
+                <img src="https://java4all.cn/images/电脑18.jpg" alt="Redission分布式锁加锁原理源码解析" title="Redission分布式锁加锁原理源码解析">
+                
+            </a>
+        </div>
+        <div class="article-feed">
+            <p>
+                追踪一下redission加锁的实现源码，并详细介绍核心加锁代码lua脚本的执行原理和过程。
+1.获取锁这里是我们自己实现，调用redission的方法，获取锁，然后加锁。lock.lock(expireTime, timeUnit)是关键，我们追进去。
+1234567891011121314/** * 获取锁，如果没有主动调用unlock解锁，expireTime后会自...
+            </p>
+        </div>
+      
+        
+    </div>
+    <footer class="article-footer">
+        
+        <ul class="article-footer-menu">
+            
+                <li><i class="fa fa-calendar"></i>2018-01-09</li>
+            
+            
+  <li class="article-footer-tags">
+    <i class="fa fa-tags"></i>
+      
+    <a href="/tags/Redission/" class="color5">Redission</a>
+      
+    <a href="/tags/分布式锁/" class="color5">分布式锁</a>
+      
+  </li>
+
+        </ul>
+        
+            <a href="/2018/01/09/Redission分布式锁加锁原理源码解析/#more" class="article-more-link" >more&gt;&gt;</a>
+        
+    </footer>
+  </div>
+</article>
+
+
+  
     <article id="post-SpringCloud教程(Finchley版本)-08：eureka集群搭建" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -713,74 +779,10 @@ Spring Cloud是什么Spring Cloud是一系列框架的有序集合。它利用Sp
 
 
   
-    <article id="post-模板" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2000/01/16/模板/"  >模板</a>
-    </h1>
-  
-
-          
-              <span class="header-cate">
-                <i class="fa fa-map-marker"></i>
-                  
-                  <a href="/categories/模板/">模板</a>
-                  
-              </span>
-          
-      </header>
-    
-    <div class="article-entry " itemprop="articleBody">
-      
-        <div class="article-img">
-            <a href="/2000/01/16/模板/" >
-                
-                <img src="https://java4all.cn/images/电脑19.jpg" alt="模板" title="模板">
-                
-            </a>
-        </div>
-        <div class="article-feed">
-            <p>
-                
-            </p>
-        </div>
-      
-        
-    </div>
-    <footer class="article-footer">
-        
-        <ul class="article-footer-menu">
-            
-                <li><i class="fa fa-calendar"></i>2000-01-16</li>
-            
-            
-  <li class="article-footer-tags">
-    <i class="fa fa-tags"></i>
-      
-    <a href="/tags/Seata/" class="color1">Seata</a>
-      
-    <a href="/tags/分布式事务/" class="color1">分布式事务</a>
-      
-  </li>
-
-        </ul>
-        
-            <a href="/2000/01/16/模板/#more" class="article-more-link" >more&gt;&gt;</a>
-        
-    </footer>
-  </div>
-</article>
-
-
-  
 
 
   <nav id="page-nav">
-    <a class="extend prev" rel="prev" href="/"><< Prev</a><a class="page-number" href="/">1</a><span class="page-number current">2</span>
+    <a class="extend prev" rel="prev" href="/"><< Prev</a><a class="page-number" href="/">1</a><span class="page-number current">2</span><a class="page-number" href="/page/3/">3</a><a class="extend next" rel="next" href="/page/3/">Next >></a>
   </nav>
 </section>
         
@@ -838,7 +840,7 @@ Spring Cloud是什么Spring Cloud是一系列框架的有序集合。它利用Sp
             <a class="category-link" href="/categories/Redission/">Redission</a><a class="category-link" href="/categories/Seata/">Seata</a><a class="category-link" href="/categories/SpringCloud/">SpringCloud</a><a class="category-link" href="/categories/linux/">linux</a><a class="category-link" href="/categories/shell/">shell</a><a class="category-link" href="/categories/分布式事务/">分布式事务</a><a class="category-link" href="/categories/分布式锁/">分布式锁</a><a class="category-link" href="/categories/模板/">模板</a><a class="category-link" href="/categories/管理/">管理</a>
         </div>
         <div id="sidebar-menu-box-tags">
-            <a href="/tags/2pc/" style="font-size: 10px;">2pc</a> <a href="/tags/3pc/" style="font-size: 10px;">3pc</a> <a href="/tags/Eureka/" style="font-size: 10px;">Eureka</a> <a href="/tags/Feign/" style="font-size: 12.5px;">Feign</a> <a href="/tags/Hystrix/" style="font-size: 12.5px;">Hystrix</a> <a href="/tags/Java/" style="font-size: 12.5px;">Java</a> <a href="/tags/Redission/" style="font-size: 10px;">Redission</a> <a href="/tags/Ribbon/" style="font-size: 12.5px;">Ribbon</a> <a href="/tags/Seata/" style="font-size: 17.5px;">Seata</a> <a href="/tags/SpringCloud/" style="font-size: 20px;">SpringCloud</a> <a href="/tags/Zuul/" style="font-size: 10px;">Zuul</a> <a href="/tags/code-review/" style="font-size: 10px;">code review</a> <a href="/tags/eureka/" style="font-size: 10px;">eureka</a> <a href="/tags/linux/" style="font-size: 12.5px;">linux</a> <a href="/tags/redis/" style="font-size: 10px;">redis</a> <a href="/tags/shell/" style="font-size: 10px;">shell</a> <a href="/tags/tcc/" style="font-size: 10px;">tcc</a> <a href="/tags/分布式事务/" style="font-size: 17.5px;">分布式事务</a> <a href="/tags/分布式锁/" style="font-size: 15px;">分布式锁</a> <a href="/tags/磁盘/" style="font-size: 10px;">磁盘</a> <a href="/tags/管理/" style="font-size: 10px;">管理</a>
+            <a href="/tags/2pc/" style="font-size: 10px;">2pc</a> <a href="/tags/3pc/" style="font-size: 10px;">3pc</a> <a href="/tags/Eureka/" style="font-size: 10px;">Eureka</a> <a href="/tags/Feign/" style="font-size: 13.33px;">Feign</a> <a href="/tags/Hystrix/" style="font-size: 13.33px;">Hystrix</a> <a href="/tags/Java/" style="font-size: 13.33px;">Java</a> <a href="/tags/Redission/" style="font-size: 10px;">Redission</a> <a href="/tags/Ribbon/" style="font-size: 13.33px;">Ribbon</a> <a href="/tags/Seata/" style="font-size: 16.67px;">Seata</a> <a href="/tags/SpringCloud/" style="font-size: 20px;">SpringCloud</a> <a href="/tags/Zuul/" style="font-size: 10px;">Zuul</a> <a href="/tags/code-review/" style="font-size: 10px;">code review</a> <a href="/tags/eureka/" style="font-size: 10px;">eureka</a> <a href="/tags/linux/" style="font-size: 13.33px;">linux</a> <a href="/tags/redis/" style="font-size: 10px;">redis</a> <a href="/tags/shell/" style="font-size: 10px;">shell</a> <a href="/tags/tcc/" style="font-size: 10px;">tcc</a> <a href="/tags/分布式事务/" style="font-size: 16.67px;">分布式事务</a> <a href="/tags/分布式锁/" style="font-size: 16.67px;">分布式锁</a> <a href="/tags/磁盘/" style="font-size: 10px;">磁盘</a> <a href="/tags/管理/" style="font-size: 10px;">管理</a>
         </div>
     </div>
     <a href="javascript:;" class="sidebar-menu-box-close">&times;</a>
@@ -871,7 +873,7 @@ Spring Cloud是什么Spring Cloud是一系列框架的有序集合。它利用Sp
     <div class="mobile-header-tag-container">
         <span class="title">Tags</span>
         <div id="mobile-header-container-tags">
-            <a href="/tags/2pc/" style="font-size: 10px;">2pc</a> <a href="/tags/3pc/" style="font-size: 10px;">3pc</a> <a href="/tags/Eureka/" style="font-size: 10px;">Eureka</a> <a href="/tags/Feign/" style="font-size: 12.5px;">Feign</a> <a href="/tags/Hystrix/" style="font-size: 12.5px;">Hystrix</a> <a href="/tags/Java/" style="font-size: 12.5px;">Java</a> <a href="/tags/Redission/" style="font-size: 10px;">Redission</a> <a href="/tags/Ribbon/" style="font-size: 12.5px;">Ribbon</a> <a href="/tags/Seata/" style="font-size: 17.5px;">Seata</a> <a href="/tags/SpringCloud/" style="font-size: 20px;">SpringCloud</a> <a href="/tags/Zuul/" style="font-size: 10px;">Zuul</a> <a href="/tags/code-review/" style="font-size: 10px;">code review</a> <a href="/tags/eureka/" style="font-size: 10px;">eureka</a> <a href="/tags/linux/" style="font-size: 12.5px;">linux</a> <a href="/tags/redis/" style="font-size: 10px;">redis</a> <a href="/tags/shell/" style="font-size: 10px;">shell</a> <a href="/tags/tcc/" style="font-size: 10px;">tcc</a> <a href="/tags/分布式事务/" style="font-size: 17.5px;">分布式事务</a> <a href="/tags/分布式锁/" style="font-size: 15px;">分布式锁</a> <a href="/tags/磁盘/" style="font-size: 10px;">磁盘</a> <a href="/tags/管理/" style="font-size: 10px;">管理</a>
+            <a href="/tags/2pc/" style="font-size: 10px;">2pc</a> <a href="/tags/3pc/" style="font-size: 10px;">3pc</a> <a href="/tags/Eureka/" style="font-size: 10px;">Eureka</a> <a href="/tags/Feign/" style="font-size: 13.33px;">Feign</a> <a href="/tags/Hystrix/" style="font-size: 13.33px;">Hystrix</a> <a href="/tags/Java/" style="font-size: 13.33px;">Java</a> <a href="/tags/Redission/" style="font-size: 10px;">Redission</a> <a href="/tags/Ribbon/" style="font-size: 13.33px;">Ribbon</a> <a href="/tags/Seata/" style="font-size: 16.67px;">Seata</a> <a href="/tags/SpringCloud/" style="font-size: 20px;">SpringCloud</a> <a href="/tags/Zuul/" style="font-size: 10px;">Zuul</a> <a href="/tags/code-review/" style="font-size: 10px;">code review</a> <a href="/tags/eureka/" style="font-size: 10px;">eureka</a> <a href="/tags/linux/" style="font-size: 13.33px;">linux</a> <a href="/tags/redis/" style="font-size: 10px;">redis</a> <a href="/tags/shell/" style="font-size: 10px;">shell</a> <a href="/tags/tcc/" style="font-size: 10px;">tcc</a> <a href="/tags/分布式事务/" style="font-size: 16.67px;">分布式事务</a> <a href="/tags/分布式锁/" style="font-size: 16.67px;">分布式锁</a> <a href="/tags/磁盘/" style="font-size: 10px;">磁盘</a> <a href="/tags/管理/" style="font-size: 10px;">管理</a>
         </div>
     </div>
 </div>
