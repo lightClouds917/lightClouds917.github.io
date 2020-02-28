@@ -107,6 +107,72 @@
       <div class="outer">
         <section id="main" class="body-wrap">
   
+    <article id="post-分布式锁系列--04关于分布式锁的选型分析02-Redlock的实现原理" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2018/01/20/分布式锁系列--04关于分布式锁的选型分析02-Redlock的实现原理/"  >分布式锁系列--04关于分布式锁的选型分析02-Redlock的实现原理</a>
+    </h1>
+  
+
+          
+              <span class="header-cate">
+                <i class="fa fa-map-marker"></i>
+                  
+                  <a href="/categories/Redlock/">Redlock</a>
+                  
+              </span>
+          
+      </header>
+    
+    <div class="article-entry " itemprop="articleBody">
+      
+        <div class="article-img">
+            <a href="/2018/01/20/分布式锁系列--04关于分布式锁的选型分析02-Redlock的实现原理/" >
+                
+                <img src="https://java4all.cn/images/电脑8.jpg" alt="分布式锁系列--04关于分布式锁的选型分析02-Redlock的实现原理" title="分布式锁系列--04关于分布式锁的选型分析02-Redlock的实现原理">
+                
+            </a>
+        </div>
+        <div class="article-feed">
+            <p>
+                上一文分布式锁系列–03关于分布式锁的选型分析01中，我们看到了单节点的redis分布式锁在failover时产生了无法解决的安全问题，因此，Redis的作者antirez提出了一种新的基于redis的分布式锁的算法Redlock，它基于N个完全独立的Redis节点（通常情况下N可以设置成5）。
+1.Redlock获取锁Redlock获取锁的原理如下：
+1.获取当前时间（...
+            </p>
+        </div>
+      
+        
+    </div>
+    <footer class="article-footer">
+        
+        <ul class="article-footer-menu">
+            
+                <li><i class="fa fa-calendar"></i>2018-01-20</li>
+            
+            
+  <li class="article-footer-tags">
+    <i class="fa fa-tags"></i>
+      
+    <a href="/tags/分布式锁/" class="color5">分布式锁</a>
+      
+    <a href="/tags/Redlock/" class="color3">Redlock</a>
+      
+  </li>
+
+        </ul>
+        
+            <a href="/2018/01/20/分布式锁系列--04关于分布式锁的选型分析02-Redlock的实现原理/#more" class="article-more-link" >more&gt;&gt;</a>
+        
+    </footer>
+  </div>
+</article>
+
+
+  
     <article id="post-分布式锁系列--03关于分布式锁的选型分析01" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -550,9 +616,9 @@
       
     <a href="/tags/SpringCloud/" class="color2">SpringCloud</a>
       
-    <a href="/tags/Hystrix/" class="color3">Hystrix</a>
-      
     <a href="/tags/Feign/" class="color1">Feign</a>
+      
+    <a href="/tags/Hystrix/" class="color3">Hystrix</a>
       
   </li>
 
@@ -690,80 +756,15 @@
       
     <a href="/tags/SpringCloud/" class="color2">SpringCloud</a>
       
-    <a href="/tags/Ribbon/" class="color2">Ribbon</a>
-      
     <a href="/tags/Hystrix/" class="color3">Hystrix</a>
+      
+    <a href="/tags/Ribbon/" class="color2">Ribbon</a>
       
   </li>
 
         </ul>
         
             <a href="/2018/01/04/SpringCloud教程(Finchley版本)-04：断路器（Hystrix-Ribbon）/#more" class="article-more-link" >more&gt;&gt;</a>
-        
-    </footer>
-  </div>
-</article>
-
-
-  
-    <article id="post-SpringCloud教程(Finchley版本)-03：负载均衡（Ribbon）" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2018/01/03/SpringCloud教程(Finchley版本)-03：负载均衡（Ribbon）/"  >SpringCloud教程(Finchley版本)-03：负载均衡（Ribbon）</a>
-    </h1>
-  
-
-          
-              <span class="header-cate">
-                <i class="fa fa-map-marker"></i>
-                  
-                  <a href="/categories/SpringCloud/">SpringCloud</a>
-                  
-              </span>
-          
-      </header>
-    
-    <div class="article-entry " itemprop="articleBody">
-      
-        <div class="article-img">
-            <a href="/2018/01/03/SpringCloud教程(Finchley版本)-03：负载均衡（Ribbon）/" >
-                
-                <img src="https://java4all.cn/images/电脑11.jpg" alt="SpringCloud教程(Finchley版本)-03：负载均衡（Ribbon）" title="SpringCloud教程(Finchley版本)-03：负载均衡（Ribbon）">
-                
-            </a>
-        </div>
-        <div class="article-feed">
-            <p>
-                Spring Cloud Ribbon是一个基于Http和TCP的客服端负载均衡工具，它是基于Netflix Ribbon实现的。它是一个工具类框架，不像服务注册中心、配置中心、API网关那样独立部署，但是它几乎存在于每个微服务的基础设施中。微服务间的调用，API网关的请求转发等，都是通过Ribbon来实现的，包括后面要介绍的Feign，也是基于Ribbon实现的工具。
-...
-            </p>
-        </div>
-      
-        
-    </div>
-    <footer class="article-footer">
-        
-        <ul class="article-footer-menu">
-            
-                <li><i class="fa fa-calendar"></i>2018-01-03</li>
-            
-            
-  <li class="article-footer-tags">
-    <i class="fa fa-tags"></i>
-      
-    <a href="/tags/SpringCloud/" class="color2">SpringCloud</a>
-      
-    <a href="/tags/Ribbon/" class="color2">Ribbon</a>
-      
-  </li>
-
-        </ul>
-        
-            <a href="/2018/01/03/SpringCloud教程(Finchley版本)-03：负载均衡（Ribbon）/#more" class="article-more-link" >more&gt;&gt;</a>
         
     </footer>
   </div>
@@ -829,10 +830,10 @@
 <div class="sidebar-menu-box" id="sidebar-menu-box">
     <div class="sidebar-menu-box-container">
         <div id="sidebar-menu-box-categories">
-            <a class="category-link" href="/categories/Redission/">Redission</a><a class="category-link" href="/categories/Redlock/">Redlock</a><a class="category-link" href="/categories/Seata/">Seata</a><a class="category-link" href="/categories/SpringCloud/">SpringCloud</a><a class="category-link" href="/categories/github/">github</a><a class="category-link" href="/categories/linux/">linux</a><a class="category-link" href="/categories/shell/">shell</a><a class="category-link" href="/categories/代理模式/">代理模式</a><a class="category-link" href="/categories/分布式事务/">分布式事务</a><a class="category-link" href="/categories/分布式锁/">分布式锁</a><a class="category-link" href="/categories/模板/">模板</a><a class="category-link" href="/categories/管理/">管理</a>
+            <a class="category-link" href="/categories/Java源码/">Java源码</a><a class="category-link" href="/categories/Redission/">Redission</a><a class="category-link" href="/categories/Redlock/">Redlock</a><a class="category-link" href="/categories/Seata/">Seata</a><a class="category-link" href="/categories/SpringCloud/">SpringCloud</a><a class="category-link" href="/categories/github/">github</a><a class="category-link" href="/categories/linux/">linux</a><a class="category-link" href="/categories/shell/">shell</a><a class="category-link" href="/categories/代理模式/">代理模式</a><a class="category-link" href="/categories/分布式事务/">分布式事务</a><a class="category-link" href="/categories/分布式锁/">分布式锁</a><a class="category-link" href="/categories/模板/">模板</a><a class="category-link" href="/categories/管理/">管理</a>
         </div>
         <div id="sidebar-menu-box-tags">
-            <a href="/tags/2pc/" style="font-size: 10px;">2pc</a> <a href="/tags/3pc/" style="font-size: 10px;">3pc</a> <a href="/tags/Eureka/" style="font-size: 10px;">Eureka</a> <a href="/tags/Feign/" style="font-size: 12.5px;">Feign</a> <a href="/tags/Hystrix/" style="font-size: 12.5px;">Hystrix</a> <a href="/tags/Java/" style="font-size: 12.5px;">Java</a> <a href="/tags/Redission/" style="font-size: 10px;">Redission</a> <a href="/tags/Redlock/" style="font-size: 10px;">Redlock</a> <a href="/tags/Ribbon/" style="font-size: 12.5px;">Ribbon</a> <a href="/tags/Seata/" style="font-size: 15px;">Seata</a> <a href="/tags/SpringCloud/" style="font-size: 20px;">SpringCloud</a> <a href="/tags/Zuul/" style="font-size: 10px;">Zuul</a> <a href="/tags/code-review/" style="font-size: 10px;">code review</a> <a href="/tags/eureka/" style="font-size: 10px;">eureka</a> <a href="/tags/github/" style="font-size: 10px;">github</a> <a href="/tags/linux/" style="font-size: 12.5px;">linux</a> <a href="/tags/redis/" style="font-size: 10px;">redis</a> <a href="/tags/shell/" style="font-size: 10px;">shell</a> <a href="/tags/tcc/" style="font-size: 10px;">tcc</a> <a href="/tags/分布式事务/" style="font-size: 15px;">分布式事务</a> <a href="/tags/分布式锁/" style="font-size: 17.5px;">分布式锁</a> <a href="/tags/动态代理/" style="font-size: 10px;">动态代理</a> <a href="/tags/磁盘/" style="font-size: 10px;">磁盘</a> <a href="/tags/管理/" style="font-size: 10px;">管理</a> <a href="/tags/静态代理/" style="font-size: 10px;">静态代理</a>
+            <a href="/tags/2pc/" style="font-size: 10px;">2pc</a> <a href="/tags/3pc/" style="font-size: 10px;">3pc</a> <a href="/tags/Eureka/" style="font-size: 10px;">Eureka</a> <a href="/tags/Feign/" style="font-size: 12.5px;">Feign</a> <a href="/tags/Hystrix/" style="font-size: 12.5px;">Hystrix</a> <a href="/tags/Java/" style="font-size: 12.5px;">Java</a> <a href="/tags/Redission/" style="font-size: 10px;">Redission</a> <a href="/tags/Redlock/" style="font-size: 10px;">Redlock</a> <a href="/tags/Ribbon/" style="font-size: 12.5px;">Ribbon</a> <a href="/tags/Seata/" style="font-size: 15px;">Seata</a> <a href="/tags/SpringCloud/" style="font-size: 20px;">SpringCloud</a> <a href="/tags/Zuul/" style="font-size: 10px;">Zuul</a> <a href="/tags/code-review/" style="font-size: 10px;">code review</a> <a href="/tags/eureka/" style="font-size: 10px;">eureka</a> <a href="/tags/github/" style="font-size: 10px;">github</a> <a href="/tags/java/" style="font-size: 10px;">java</a> <a href="/tags/linux/" style="font-size: 12.5px;">linux</a> <a href="/tags/redis/" style="font-size: 10px;">redis</a> <a href="/tags/shell/" style="font-size: 10px;">shell</a> <a href="/tags/tcc/" style="font-size: 10px;">tcc</a> <a href="/tags/分布式事务/" style="font-size: 15px;">分布式事务</a> <a href="/tags/分布式锁/" style="font-size: 17.5px;">分布式锁</a> <a href="/tags/动态代理/" style="font-size: 10px;">动态代理</a> <a href="/tags/磁盘/" style="font-size: 10px;">磁盘</a> <a href="/tags/管理/" style="font-size: 10px;">管理</a> <a href="/tags/配置/" style="font-size: 10px;">配置</a> <a href="/tags/静态代理/" style="font-size: 10px;">静态代理</a>
         </div>
     </div>
     <a href="javascript:;" class="sidebar-menu-box-close">&times;</a>
@@ -865,7 +866,7 @@
     <div class="mobile-header-tag-container">
         <span class="title">Tags</span>
         <div id="mobile-header-container-tags">
-            <a href="/tags/2pc/" style="font-size: 10px;">2pc</a> <a href="/tags/3pc/" style="font-size: 10px;">3pc</a> <a href="/tags/Eureka/" style="font-size: 10px;">Eureka</a> <a href="/tags/Feign/" style="font-size: 12.5px;">Feign</a> <a href="/tags/Hystrix/" style="font-size: 12.5px;">Hystrix</a> <a href="/tags/Java/" style="font-size: 12.5px;">Java</a> <a href="/tags/Redission/" style="font-size: 10px;">Redission</a> <a href="/tags/Redlock/" style="font-size: 10px;">Redlock</a> <a href="/tags/Ribbon/" style="font-size: 12.5px;">Ribbon</a> <a href="/tags/Seata/" style="font-size: 15px;">Seata</a> <a href="/tags/SpringCloud/" style="font-size: 20px;">SpringCloud</a> <a href="/tags/Zuul/" style="font-size: 10px;">Zuul</a> <a href="/tags/code-review/" style="font-size: 10px;">code review</a> <a href="/tags/eureka/" style="font-size: 10px;">eureka</a> <a href="/tags/github/" style="font-size: 10px;">github</a> <a href="/tags/linux/" style="font-size: 12.5px;">linux</a> <a href="/tags/redis/" style="font-size: 10px;">redis</a> <a href="/tags/shell/" style="font-size: 10px;">shell</a> <a href="/tags/tcc/" style="font-size: 10px;">tcc</a> <a href="/tags/分布式事务/" style="font-size: 15px;">分布式事务</a> <a href="/tags/分布式锁/" style="font-size: 17.5px;">分布式锁</a> <a href="/tags/动态代理/" style="font-size: 10px;">动态代理</a> <a href="/tags/磁盘/" style="font-size: 10px;">磁盘</a> <a href="/tags/管理/" style="font-size: 10px;">管理</a> <a href="/tags/静态代理/" style="font-size: 10px;">静态代理</a>
+            <a href="/tags/2pc/" style="font-size: 10px;">2pc</a> <a href="/tags/3pc/" style="font-size: 10px;">3pc</a> <a href="/tags/Eureka/" style="font-size: 10px;">Eureka</a> <a href="/tags/Feign/" style="font-size: 12.5px;">Feign</a> <a href="/tags/Hystrix/" style="font-size: 12.5px;">Hystrix</a> <a href="/tags/Java/" style="font-size: 12.5px;">Java</a> <a href="/tags/Redission/" style="font-size: 10px;">Redission</a> <a href="/tags/Redlock/" style="font-size: 10px;">Redlock</a> <a href="/tags/Ribbon/" style="font-size: 12.5px;">Ribbon</a> <a href="/tags/Seata/" style="font-size: 15px;">Seata</a> <a href="/tags/SpringCloud/" style="font-size: 20px;">SpringCloud</a> <a href="/tags/Zuul/" style="font-size: 10px;">Zuul</a> <a href="/tags/code-review/" style="font-size: 10px;">code review</a> <a href="/tags/eureka/" style="font-size: 10px;">eureka</a> <a href="/tags/github/" style="font-size: 10px;">github</a> <a href="/tags/java/" style="font-size: 10px;">java</a> <a href="/tags/linux/" style="font-size: 12.5px;">linux</a> <a href="/tags/redis/" style="font-size: 10px;">redis</a> <a href="/tags/shell/" style="font-size: 10px;">shell</a> <a href="/tags/tcc/" style="font-size: 10px;">tcc</a> <a href="/tags/分布式事务/" style="font-size: 15px;">分布式事务</a> <a href="/tags/分布式锁/" style="font-size: 17.5px;">分布式锁</a> <a href="/tags/动态代理/" style="font-size: 10px;">动态代理</a> <a href="/tags/磁盘/" style="font-size: 10px;">磁盘</a> <a href="/tags/管理/" style="font-size: 10px;">管理</a> <a href="/tags/配置/" style="font-size: 10px;">配置</a> <a href="/tags/静态代理/" style="font-size: 10px;">静态代理</a>
         </div>
     </div>
 </div>

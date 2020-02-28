@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html>
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="utf-8">
+  
+  <title>Java中Properties类 | Hexo</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  
+    <meta name="keywords" content="IT云清的博客">
+  
+  <meta name="description" content="一、Java Properties类 ​    Java中有个比较重要的类Properties（Java.util.Properties），主要用于读取Java的配置文件，各种语言都有自己所支持的配置文件，配置文件中很多变量是经常改变的，这样做也是为了方便用户，让用户能够脱离程序本身去修改相关的变量设置。像Python支持的配置文件是.ini文件，同样，它也有自己读取配置文件的类ConfigPar">
+<meta name="keywords" content="java,配置">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Java中Properties类">
+<meta property="og:url" content="https://java4all.cn/2018/05/05/Java-Properties/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="一、Java Properties类 ​    Java中有个比较重要的类Properties（Java.util.Properties），主要用于读取Java的配置文件，各种语言都有自己所支持的配置文件，配置文件中很多变量是经常改变的，这样做也是为了方便用户，让用户能够脱离程序本身去修改相关的变量设置。像Python支持的配置文件是.ini文件，同样，它也有自己读取配置文件的类ConfigPar">
+<meta property="og:locale" content="en">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/20200228212548899.png">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/20200228212610764.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl8zOTgwMDE0NA==,size_16,color_FFFFFF,t_70">
+<meta property="og:image" content="https://imgconvert.csdnimg.cn/aHR0cHM6Ly9pbWFnZXMwLmNuYmxvZ3MuY29tL2Jsb2cvNDMxNTIxLzIwMTQwMi8yMzE5MDgxMTk1MDE5OTYucG5n?x-oss-process=image/format,png">
+<meta property="og:updated_time" content="2020-02-28T13:33:34.882Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Java中Properties类">
+<meta name="twitter:description" content="一、Java Properties类 ​    Java中有个比较重要的类Properties（Java.util.Properties），主要用于读取Java的配置文件，各种语言都有自己所支持的配置文件，配置文件中很多变量是经常改变的，这样做也是为了方便用户，让用户能够脱离程序本身去修改相关的变量设置。像Python支持的配置文件是.ini文件，同样，它也有自己读取配置文件的类ConfigPar">
+<meta name="twitter:image" content="https://img-blog.csdnimg.cn/20200228212548899.png">
+  
+  
+    <link rel="icon" href="/my.icon">
+  
+  <link href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+  <link rel="stylesheet" href="/css/style.css">
+  <script src="/js/pace.min.js"></script>
+  
+
+  
+  
+
+</head>
+</html>
+<body>
+  <div id="container">
+      <header id="header">
+    <div id="banner"></div>
+    <div id="header-outer">
+        <div id="header-menu" class="header-menu-pos animated">
+            <div class="header-menu-container">
+                <a href="/" class="left">
+                    <span class="site-title">IT云清</span>
+                </a>
+                <nav id="header-menu-nav" class="right">
+                    
+                    <a  href="/">
+                        <i class="fa fa-home"></i>
+                        <span>Home</span>
+                    </a>
+                    
+                    <a  href="/archives">
+                        <i class="fa fa-archive"></i>
+                        <span>Archives</span>
+                    </a>
+                    
+                    <a  href="/about">
+                        <i class="fa fa-user"></i>
+                        <span>About</span>
+                    </a>
+                    
+                </nav>
+                <a class="mobile-header-menu-button">
+                    <i class="fa fa-bars"></i>
+                </a>
+            </div>
+        </div>
+        <div id="header-row">
+            <div id="logo">
+                <a href="/">
+                    <img src="/images/logo3.jpg" alt="logo">
+                </a>
+            </div>
+            <div class="header-info">
+                <div id="header-title">
+                    
+                    <h2>
+                        IT云清
+                    </h2>
+                    
+                </div>
+                <div id="header-description">
+                    
+                    <h3>
+                        专注于JAVA
+                    </h3>
+                    
+                </div>
+            </div>
+            <nav class="header-nav">
+                <div class="social">
+                    
+                        <a title="IT云清" target="_blank" href="//java4all.cn">
+                            <i class="fa fa-home fa-2x"></i></a>
+                    
+                        <a title="Github" target="_blank" href="//github.com/lightClouds917">
+                            <i class="fa fa-github fa-2x"></i></a>
+                    
+                        <a title="CSDN" target="_blank" href="//it4all.blog.csdn.net">
+                            <i class="fa fa-twitter fa-2x"></i></a>
+                    
+                        <a title="Wechat" target="_blank" href="//java4all.cn/images/wechat_code_me.png">
+                            <i class="fa fa-weixin fa-2x"></i></a>
+                    
+                </div>
+            </nav>
+        </div>
+    </div>
+</header>
+      <div class="outer">
+        <section id="main" class="body-wrap"><article id="post-Java-Properties" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 class="post-title" itemprop="name">
+      Java中Properties类
+    </h1>
+    <div class="post-title-bar">
+      <ul>
+          
+              <li>
+                  <i class="fa fa-book"></i>
+                  
+                      <a href="/categories/Java源码/">Java源码</a>
+                  
+              </li>
+          
+        <li>
+          <i class="fa fa-calendar"></i>  2018-05-05
+        </li>
+        <li>
+          <i class="fa fa-eye"></i>
+          <span id="busuanzi_value_page_pv"></span>
+        </li>
+      </ul>
+    </div>
+  
+
+          
+      </header>
+    
+    <div class="article-entry post-content" itemprop="articleBody">
+      
+            
+            <p><strong>一、Java Properties类</strong></p>
+<p>​    Java中有个比较重要的类Properties（Java.util.Properties），主要用于读取Java的配置文件，各种语言都有自己所支持的配置文件，配置文件中很多变量是经常改变的，这样做也是为了方便用户，让用户能够脱离程序本身去修改相关的变量设置。像Python支持的配置文件是.ini文件，同样，它也有自己读取配置文件的类ConfigParse，方便程序员或用户通过该类的方法来修改.ini配置文件。在Java中，其配置文件常为.properties文件，格式为文本文件，文件的内容的格式是“键=值”的格式，文本注释信息可以用”#”来注释。</p>
+<p>Properties类继承自Hashtable，如下：<br><img src="https://img-blog.csdnimg.cn/20200228212548899.png" alt="在这里插入图片描述"></p>
+<p>它提供了几个主要的方法：</p>
+<p>1． getProperty ( String key)，用指定的键在此属性列表中搜索属性。也就是通过参数 key ，得到 key 所对应的 value。</p>
+<p>2． load ( InputStream inStream)，从输入流中读取属性列表（键和元素对）。通过对指定的文件（比如说上面的 test.properties 文件）进行装载来获取该文件中的所有键 - 值对。以供 getProperty ( String key) 来搜索。</p>
+<p>3． setProperty ( String key, String value) ，调用 Hashtable 的方法 put 。他通过调用基类的put方法来设置 键 - 值对。</p>
+<p>4． store ( OutputStream out, String comments)，以适合使用 load 方法加载到 Properties 表中的格式，将此 Properties 表中的属性列表（键和元素对）写入输出流。与 load 方法相反，该方法将键 - 值对写入到指定的文件中去。</p>
+<p>5． clear ()，清除所有装载的 键 - 值对。该方法在基类中提供。</p>
+<p><strong>二、Java读取Properties文件</strong></p>
+<p>​    Java读取Properties文件的方法有很多，详见： <a href="http://blog.csdn.net/Senton/article/details/4083127" target="_blank" rel="noopener">Java读取Properties文件的六种方法</a></p>
+<p>但是最常用的还是通过java.lang.Class类的getResourceAsStream(String name)方法来实现，如下可以这样调用：</p>
+<p>InputStream in = getClass().getResourceAsStream(“资源Name”);作为我们写程序的，用此一种足够。</p>
+<p>或者下面这种也常用：</p>
+<p>InputStream in = new BufferedInputStream(new FileInputStream(filepath));</p>
+<p><strong>三、相关实例</strong></p>
+<p>下面列举几个实例，加深对Properties类的理解和记忆。</p>
+<p>我们知道，Java虚拟机（JVM）有自己的系统配置文件（system.properties），我们可以通过下面的方式来获取。</p>
+<p>1、获取JVM的系统属性</p>
+<p><img src="https://img-blog.csdnimg.cn/20200228212610764.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl8zOTgwMDE0NA==,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> java.util.Properties;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">ReadJVM</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        Properties pps = System.getProperties();</span><br><span class="line">        pps.list(System.out);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>结果：</p>
+<p><img src="https://imgconvert.csdnimg.cn/aHR0cHM6Ly9pbWFnZXMwLmNuYmxvZ3MuY29tL2Jsb2cvNDMxNTIxLzIwMTQwMi8yMzE5MDgxMTk1MDE5OTYucG5n?x-oss-process=image/format,png" alt="img"></p>
+<p>2、随便新建一个配置文件（Test.properties）</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">name=JJ</span><br><span class="line">Weight=4444</span><br><span class="line">Height=3333</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> java.util.Properties;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">ReadJVM</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        Properties pps = System.getProperties();</span><br><span class="line">        pps.list(System.out);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>3、一个比较综合的实例</p>
+<p>根据key读取value</p>
+<p>读取properties的全部信息</p>
+<p>写入新的properties信息</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//关于Properties类常用的操作</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">TestProperties</span> </span>&#123;</span><br><span class="line">    <span class="comment">//根据Key读取Value</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> String <span class="title">GetValueByKey</span><span class="params">(String filePath, String key)</span> </span>&#123;</span><br><span class="line">        Properties pps = <span class="keyword">new</span> Properties();</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            InputStream in = <span class="keyword">new</span> BufferedInputStream (<span class="keyword">new</span> FileInputStream(filePath));  </span><br><span class="line">            pps.load(in);</span><br><span class="line">            String value = pps.getProperty(key);</span><br><span class="line">            System.out.println(key + <span class="string">" = "</span> + value);</span><br><span class="line">            <span class="keyword">return</span> value;</span><br><span class="line">            </span><br><span class="line">        &#125;<span class="keyword">catch</span> (IOException e) &#123;</span><br><span class="line">            e.printStackTrace();</span><br><span class="line">            <span class="keyword">return</span> <span class="keyword">null</span>;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">//读取Properties的全部信息</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">GetAllProperties</span><span class="params">(String filePath)</span> <span class="keyword">throws</span> IOException </span>&#123;</span><br><span class="line">        Properties pps = <span class="keyword">new</span> Properties();</span><br><span class="line">        InputStream in = <span class="keyword">new</span> BufferedInputStream(<span class="keyword">new</span> FileInputStream(filePath));</span><br><span class="line">        pps.load(in);</span><br><span class="line">        Enumeration en = pps.propertyNames(); <span class="comment">//得到配置文件的名字</span></span><br><span class="line">        </span><br><span class="line">        <span class="keyword">while</span>(en.hasMoreElements()) &#123;</span><br><span class="line">            String strKey = (String) en.nextElement();</span><br><span class="line">            String strValue = pps.getProperty(strKey);</span><br><span class="line">            System.out.println(strKey + <span class="string">"="</span> + strValue);</span><br><span class="line">        &#125;</span><br><span class="line">        </span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">//写入Properties信息</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">WriteProperties</span> <span class="params">(String filePath, String pKey, String pValue)</span> <span class="keyword">throws</span> IOException </span>&#123;</span><br><span class="line">        Properties pps = <span class="keyword">new</span> Properties();</span><br><span class="line">        </span><br><span class="line">        InputStream in = <span class="keyword">new</span> FileInputStream(filePath);</span><br><span class="line">        <span class="comment">//从输入流中读取属性列表（键和元素对） </span></span><br><span class="line">        pps.load(in);</span><br><span class="line">        <span class="comment">//调用 Hashtable 的方法 put。使用 getProperty 方法提供并行性。  </span></span><br><span class="line">        <span class="comment">//强制要求为属性的键和值使用字符串。返回值是 Hashtable 调用 put 的结果。</span></span><br><span class="line">        OutputStream out = <span class="keyword">new</span> FileOutputStream(filePath);</span><br><span class="line">        pps.setProperty(pKey, pValue);</span><br><span class="line">        <span class="comment">//以适合使用 load 方法加载到 Properties 表中的格式，  </span></span><br><span class="line">        <span class="comment">//将此 Properties 表中的属性列表（键和元素对）写入输出流  </span></span><br><span class="line">        pps.store(out, <span class="string">"Update "</span> + pKey + <span class="string">" name"</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String [] args)</span> <span class="keyword">throws</span> IOException</span>&#123;</span><br><span class="line">        <span class="comment">//String value = GetValueByKey("Test.properties", "name");</span></span><br><span class="line">        <span class="comment">//System.out.println(value);</span></span><br><span class="line">        <span class="comment">//GetAllProperties("Test.properties");</span></span><br><span class="line">        WriteProperties(<span class="string">"Test.properties"</span>,<span class="string">"long"</span>, <span class="string">"212"</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>结果：<br>Test.properties中文件的数据为：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">#Update long name</span><br><span class="line">#Sun Feb 23 18:17:16 CST 2014</span><br><span class="line">name=JJ</span><br><span class="line">Weight=<span class="number">4444</span></span><br><span class="line"><span class="keyword">long</span>=<span class="number">212</span></span><br><span class="line">Height=<span class="number">3333</span></span><br></pre></td></tr></table></figure>
+
+<p>作者：公众号「Linux云计算网络」，专注于Linux、云计算、网络领域技术干货分享</p>
+<p>出处：<a href="https://www.cnblogs.com/bakari/p/3562244.html" target="_blank" rel="noopener">https://www.cnblogs.com/bakari/p/3562244.html</a></p>
+<p>本站使用「署名 4.0 国际」创作共享协议，转载请在文章明显位置注明作者及出处。</p>
+
+            <div class="post-copyright">
+    <div class="content">
+        <p>最后更新： 2020年02月28日 21:33</p>
+        <p>原始链接： <a class="post-url" href="/2018/05/05/Java-Properties/" title="Java中Properties类">https://java4all.cn/2018/05/05/Java-Properties/</a></p>
+        <footer>
+            <a href="https://java4all.cn">
+                <img src="/images/logo3.jpg" alt="IT云清">
+                IT云清
+            </a>
+        </footer>
+    </div>
+</div>
+
+      
+        
+            
+
+        
+    </div>
+    <footer class="article-footer">
+        
+        
+<div class="post-share">
+    <a href="javascript:;" id="share-sub" class="post-share-fab">
+        <i class="fa fa-share-alt"></i>
+    </a>
+    <div class="post-share-list" id="share-list">
+        <ul class="share-icons">
+          <li>
+            <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=https://java4all.cn/2018/05/05/Java-Properties/&title=《Java中Properties类》 — Hexo&pic=https://java4all.cn/images/电脑19.jpg" data-title="微博">
+              <i class="fa fa-weibo"></i>
+            </a>
+          </li>
+          <li>
+            <a class="weixin share-sns" id="wxFab" href="javascript:;" data-title="微信">
+              <i class="fa fa-weixin"></i>
+            </a>
+          </li>
+          <li>
+            <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=https://java4all.cn/2018/05/05/Java-Properties/&title=《Java中Properties类》 — Hexo&source=" data-title="QQ">
+              <i class="fa fa-qq"></i>
+            </a>
+          </li>
+          <li>
+            <a class="facebook share-sns" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=https://java4all.cn/2018/05/05/Java-Properties/" data-title="Facebook">
+              <i class="fa fa-facebook"></i>
+            </a>
+          </li>
+          <li>
+            <a class="twitter share-sns" target="_blank" href="https://twitter.com/intent/tweet?text=《Java中Properties类》 — Hexo&url=https://java4all.cn/2018/05/05/Java-Properties/&via=https://java4all.cn" data-title="Twitter">
+              <i class="fa fa-twitter"></i>
+            </a>
+          </li>
+          <li>
+            <a class="google share-sns" target="_blank" href="https://plus.google.com/share?url=https://java4all.cn/2018/05/05/Java-Properties/" data-title="Google+">
+              <i class="fa fa-google-plus"></i>
+            </a>
+          </li>
+        </ul>
+     </div>
+</div>
+<div class="post-modal wx-share" id="wxShare">
+    <a class="close" href="javascript:;" id="wxShare-close">×</a>
+    <p>扫一扫，分享到微信</p>
+    <img src="//api.qrserver.com/v1/create-qr-code/?data=https://java4all.cn/2018/05/05/Java-Properties/" alt="微信分享二维码">
+</div>
+
+<div class="mask"></div>
+
+        
+        <ul class="article-footer-menu">
+            
+            
+  <li class="article-footer-tags">
+    <i class="fa fa-tags"></i>
+      
+    <a href="/tags/java/" class="color5">java</a>
+      
+    <a href="/tags/配置/" class="color3">配置</a>
+      
+  </li>
+
+        </ul>
+        
+    </footer>
+  </div>
+</article>
+
+
+
+<nav id="article-nav">
+  
+    <a href="/2018/10/01/Linux添加shell脚本并添加定时任务/" id="article-nav-newer" class="article-nav-link-wrap">
+
+      <span class="article-nav-title">
+        <i class="fa fa-hand-o-left" aria-hidden="true"></i>
+        
+          Linux添加shell脚本并添加定时任务
+        
+      </span>
+    </a>
+  
+  
+    <a href="/2018/05/01/深入理解分布式事务/" id="article-nav-older" class="article-nav-link-wrap">
+      <span class="article-nav-title">深入理解分布式事务</span>
+      <i class="fa fa-hand-o-right" aria-hidden="true"></i>
+    </a>
+  
+</nav>
+
+
+
+    
+</section>
+        
+      </div>
+      <footer id="footer">
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      
+<p>
+    <span id="busuanzi_container_site_uv" style='display:none'>
+        今日访客数：<span id="busuanzi_value_site_uv"></span>
+    </span>
+    <span id="busuanzi_container_site_pv" style='display:none'>
+        今日访问量：<span id="busuanzi_value_site_pv"></span>
+    </span>
+</p>
+
+
+      <p>
+        Powered by  <a href="http://hexo.io/" target="_blank">Hexo</a>
+        Theme <a href="//github.com/wongminho/hexo-theme-miho" target="_blank">MiHo</a>
+      &copy; 2020 IT云清<br>
+      </p>
+    </div>
+  </div>
+</footer>
+    <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+<script src="//cdn.bootcss.com/jquery/3.2.1/jquery.min.js"></script>
+<script>
+  var mihoConfig = {
+      root: "https://java4all.cn",
+      animate: true,
+      isHome: false,
+      share: true,
+      reward: 0
+  }
+</script>
+<div class="sidebar">
+    <div id="sidebar-search" title="Search">
+        <i class="fa fa-search"></i>
+    </div>
+    <div id="sidebar-category" title="Categories">
+        <i class="fa fa-book"></i>
+    </div>
+    <div id="sidebar-tag" title="Tags">
+        <i class="fa fa-tags"></i>
+    </div>
+    <div id="sidebar-top">
+        <span class="sidebar-top-icon"><i class="fa fa-angle-up"></i></span>
+    </div>
+</div>
+<div class="sidebar-menu-box" id="sidebar-menu-box">
+    <div class="sidebar-menu-box-container">
+        <div id="sidebar-menu-box-categories">
+            <a class="category-link" href="/categories/Java源码/">Java源码</a><a class="category-link" href="/categories/Redission/">Redission</a><a class="category-link" href="/categories/Redlock/">Redlock</a><a class="category-link" href="/categories/Seata/">Seata</a><a class="category-link" href="/categories/SpringCloud/">SpringCloud</a><a class="category-link" href="/categories/github/">github</a><a class="category-link" href="/categories/linux/">linux</a><a class="category-link" href="/categories/shell/">shell</a><a class="category-link" href="/categories/代理模式/">代理模式</a><a class="category-link" href="/categories/分布式事务/">分布式事务</a><a class="category-link" href="/categories/分布式锁/">分布式锁</a><a class="category-link" href="/categories/模板/">模板</a><a class="category-link" href="/categories/管理/">管理</a>
+        </div>
+        <div id="sidebar-menu-box-tags">
+            <a href="/tags/2pc/" style="font-size: 10px;">2pc</a> <a href="/tags/3pc/" style="font-size: 10px;">3pc</a> <a href="/tags/Eureka/" style="font-size: 10px;">Eureka</a> <a href="/tags/Feign/" style="font-size: 12.5px;">Feign</a> <a href="/tags/Hystrix/" style="font-size: 12.5px;">Hystrix</a> <a href="/tags/Java/" style="font-size: 12.5px;">Java</a> <a href="/tags/Redission/" style="font-size: 10px;">Redission</a> <a href="/tags/Redlock/" style="font-size: 10px;">Redlock</a> <a href="/tags/Ribbon/" style="font-size: 12.5px;">Ribbon</a> <a href="/tags/Seata/" style="font-size: 15px;">Seata</a> <a href="/tags/SpringCloud/" style="font-size: 20px;">SpringCloud</a> <a href="/tags/Zuul/" style="font-size: 10px;">Zuul</a> <a href="/tags/code-review/" style="font-size: 10px;">code review</a> <a href="/tags/eureka/" style="font-size: 10px;">eureka</a> <a href="/tags/github/" style="font-size: 10px;">github</a> <a href="/tags/java/" style="font-size: 10px;">java</a> <a href="/tags/linux/" style="font-size: 12.5px;">linux</a> <a href="/tags/redis/" style="font-size: 10px;">redis</a> <a href="/tags/shell/" style="font-size: 10px;">shell</a> <a href="/tags/tcc/" style="font-size: 10px;">tcc</a> <a href="/tags/分布式事务/" style="font-size: 15px;">分布式事务</a> <a href="/tags/分布式锁/" style="font-size: 17.5px;">分布式锁</a> <a href="/tags/动态代理/" style="font-size: 10px;">动态代理</a> <a href="/tags/磁盘/" style="font-size: 10px;">磁盘</a> <a href="/tags/管理/" style="font-size: 10px;">管理</a> <a href="/tags/配置/" style="font-size: 10px;">配置</a> <a href="/tags/静态代理/" style="font-size: 10px;">静态代理</a>
+        </div>
+    </div>
+    <a href="javascript:;" class="sidebar-menu-box-close">&times;</a>
+</div>
+<div class="mobile-header-menu-nav" id="mobile-header-menu-nav">
+    <div class="mobile-header-menu-container">
+        <span class="title">Menus</span>
+        <ul class="mobile-header-menu-navbar">
+            
+            <li>
+                <a  href="/">
+                    <i class="fa fa-home"></i><span>Home</span>
+                </a>
+            </li>
+            
+            <li>
+                <a  href="/archives">
+                    <i class="fa fa-archive"></i><span>Archives</span>
+                </a>
+            </li>
+            
+            <li>
+                <a  href="/about">
+                    <i class="fa fa-user"></i><span>About</span>
+                </a>
+            </li>
+            
+        </ul>
+    </div>
+    <div class="mobile-header-tag-container">
+        <span class="title">Tags</span>
+        <div id="mobile-header-container-tags">
+            <a href="/tags/2pc/" style="font-size: 10px;">2pc</a> <a href="/tags/3pc/" style="font-size: 10px;">3pc</a> <a href="/tags/Eureka/" style="font-size: 10px;">Eureka</a> <a href="/tags/Feign/" style="font-size: 12.5px;">Feign</a> <a href="/tags/Hystrix/" style="font-size: 12.5px;">Hystrix</a> <a href="/tags/Java/" style="font-size: 12.5px;">Java</a> <a href="/tags/Redission/" style="font-size: 10px;">Redission</a> <a href="/tags/Redlock/" style="font-size: 10px;">Redlock</a> <a href="/tags/Ribbon/" style="font-size: 12.5px;">Ribbon</a> <a href="/tags/Seata/" style="font-size: 15px;">Seata</a> <a href="/tags/SpringCloud/" style="font-size: 20px;">SpringCloud</a> <a href="/tags/Zuul/" style="font-size: 10px;">Zuul</a> <a href="/tags/code-review/" style="font-size: 10px;">code review</a> <a href="/tags/eureka/" style="font-size: 10px;">eureka</a> <a href="/tags/github/" style="font-size: 10px;">github</a> <a href="/tags/java/" style="font-size: 10px;">java</a> <a href="/tags/linux/" style="font-size: 12.5px;">linux</a> <a href="/tags/redis/" style="font-size: 10px;">redis</a> <a href="/tags/shell/" style="font-size: 10px;">shell</a> <a href="/tags/tcc/" style="font-size: 10px;">tcc</a> <a href="/tags/分布式事务/" style="font-size: 15px;">分布式事务</a> <a href="/tags/分布式锁/" style="font-size: 17.5px;">分布式锁</a> <a href="/tags/动态代理/" style="font-size: 10px;">动态代理</a> <a href="/tags/磁盘/" style="font-size: 10px;">磁盘</a> <a href="/tags/管理/" style="font-size: 10px;">管理</a> <a href="/tags/配置/" style="font-size: 10px;">配置</a> <a href="/tags/静态代理/" style="font-size: 10px;">静态代理</a>
+        </div>
+    </div>
+</div>
+<div class="search-wrap">
+    <span class="search-close">&times;</span>
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="back">
+            <i class="icon icon-lg icon-chevron-left"></i>
+        </a>
+        <input class="search-field" placeholder="Search..." id="keywords">
+        <a id="search-submit" href="javascript:;">
+            <i class="fa fa-search"></i>
+        </a>
+    <div class="search-container" id="search-container">
+        <ul class="search-result" id="search-result">
+        </ul>
+    </div>
+</div>
+
+<div id="search-tpl">
+    <li class="search-result-item">
+        <a href="{url}" class="search-item-li">
+            <span class="search-item-li-title" title="{title}">{title}</span>
+        </a>
+    </li>
+</div>
+<script src="/js/search.js"></script>
+<script src="/js/main.js"></script>
+
+
+  <script src="//cdn.bootcss.com/particles.js/2.0.0/particles.min.js"></script>
+  <div id="particles"></div>
+  <script src="/js/particles.js"></script>
+
+
+
+
+
+
+
+  <link rel="stylesheet" href="//cdn.bootcss.com/animate.css/3.5.0/animate.min.css">
+  <script src="//cdn.bootcss.com/scrollReveal.js/3.0.5/scrollreveal.js"></script>
+  <script src="/js/animate.js"></script>
+
+
+  <script src="/js/pop-img.js"></script>
+  <script>
+     $(".article-entry p img").popImg();
+  </script>
+
+  </div>
+</body>
+</html>
